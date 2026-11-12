@@ -674,9 +674,9 @@ function holidays(y) {
 
 /* Schulferien (KMK / Länder), erster und letzter Ferientag */
 const FERIEN = {
-  NRW: [["2026-01-01","2026-01-06","Weihnachtsferien"],["2026-03-30","2026-04-11","Osterferien"],["2026-05-26","2026-05-26","Pfingstferien"],["2026-07-20","2026-09-01","Sommerferien"],["2026-10-17","2026-10-31","Herbstferien"],["2026-12-23","2027-01-06","Weihnachtsferien"],["2027-03-22","2027-04-03","Osterferien"],["2027-05-18","2027-05-18","Pfingstferien"],["2027-07-19","2027-08-31","Sommerferien"],["2027-10-23","2027-11-06","Herbstferien"],["2027-12-24","2028-01-08","Weihnachtsferien"]],
-  HE: [["2026-01-01","2026-01-10","Weihnachtsferien"],["2026-03-30","2026-04-10","Osterferien"],["2026-06-29","2026-08-07","Sommerferien"],["2026-10-05","2026-10-17","Herbstferien"],["2026-12-23","2027-01-12","Weihnachtsferien"],["2027-03-22","2027-04-02","Osterferien"],["2027-06-28","2027-08-06","Sommerferien"],["2027-10-04","2027-10-16","Herbstferien"],["2027-12-23","2028-01-11","Weihnachtsferien"]],
-  HH: [["2026-01-01","2026-01-02","Weihnachtsferien"],["2026-01-30","2026-01-30","Schulfreier Tag"],["2026-03-02","2026-03-13","Frühjahrsferien"],["2026-05-11","2026-05-15","Pfingstferien"],["2026-07-09","2026-08-19","Sommerferien"],["2026-10-19","2026-10-30","Herbstferien"],["2026-12-21","2027-01-01","Weihnachtsferien"],["2027-01-29","2027-01-29","Schulfreier Tag"],["2027-03-01","2027-03-12","Frühjahrsferien"],["2027-05-07","2027-05-14","Pfingstferien"],["2027-07-01","2027-08-11","Sommerferien"],["2027-10-11","2027-10-22","Herbstferien"],["2027-12-20","2027-12-31","Weihnachtsferien"]]
+  NRW: [["2026-01-01","2026-01-06","Weihnachtsferien"],["2026-03-30","2026-04-11","Osterferien"],["2026-05-26","2026-05-26","Pfingstferien"],["2026-07-20","2026-09-01","Sommerferien"],["2026-10-17","2026-10-31","Herbstferien"],["2026-12-23","2027-01-06","Weihnachtsferien"],["2027-03-22","2027-04-03","Osterferien"],["2027-05-18","2027-05-18","Pfingstferien"],["2027-07-19","2027-08-31","Sommerferien"],["2027-10-23","2027-11-06","Herbstferien"],["2027-12-24","2028-01-08","Weihnachtsferien"],["2028-04-10","2028-04-22","Osterferien"],["2028-07-10","2028-08-22","Sommerferien"],["2028-10-23","2028-11-04","Herbstferien"],["2028-12-21","2029-01-05","Weihnachtsferien"]],
+  HE: [["2026-01-01","2026-01-10","Weihnachtsferien"],["2026-03-30","2026-04-10","Osterferien"],["2026-06-29","2026-08-07","Sommerferien"],["2026-10-05","2026-10-17","Herbstferien"],["2026-12-23","2027-01-12","Weihnachtsferien"],["2027-03-22","2027-04-02","Osterferien"],["2027-06-28","2027-08-06","Sommerferien"],["2027-10-04","2027-10-16","Herbstferien"],["2027-12-23","2028-01-11","Weihnachtsferien"],["2028-04-03","2028-04-14","Osterferien"],["2028-07-03","2028-08-11","Sommerferien"],["2028-10-09","2028-10-20","Herbstferien"],["2028-12-27","2029-01-12","Weihnachtsferien"]],
+  HH: [["2026-01-01","2026-01-02","Weihnachtsferien"],["2026-01-30","2026-01-30","Schulfreier Tag"],["2026-03-02","2026-03-13","Frühjahrsferien"],["2026-05-11","2026-05-15","Pfingstferien"],["2026-07-09","2026-08-19","Sommerferien"],["2026-10-19","2026-10-30","Herbstferien"],["2026-12-21","2027-01-01","Weihnachtsferien"],["2027-01-29","2027-01-29","Schulfreier Tag"],["2027-03-01","2027-03-12","Frühjahrsferien"],["2027-05-07","2027-05-14","Pfingstferien"],["2027-07-01","2027-08-11","Sommerferien"],["2027-10-11","2027-10-22","Herbstferien"],["2027-12-20","2027-12-31","Weihnachtsferien"],["2028-01-28","2028-01-28","Schulfreier Tag"],["2028-03-06","2028-03-17","Frühjahrsferien"],["2028-05-22","2028-05-26","Pfingstferien"],["2028-07-03","2028-08-11","Sommerferien"],["2028-10-02","2028-10-13","Herbstferien"],["2028-10-30","2028-10-30","Schulfreier Tag"],["2028-12-18","2028-12-29","Weihnachtsferien"]]
 };
 const STATE_NAME = { NRW: "NRW", HE: "Hessen", HH: "Hamburg" };
 function ferienOn(state, d) { return FERIEN[state].find(([a, b]) => a <= d && d <= b) || null; }
@@ -688,7 +688,7 @@ if (typeof window === "undefined") return;
    Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
    Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
    Die Datei ist in beiden Umgebungen identisch. */
-const APP_VERSION = "4.2.3";
+const APP_VERSION = "4.3.0";
 const LIVE = {
   hosts: ["casalapaz.github.io"],
   url: "https://nwrkrotxhgtxtshprfur.supabase.co",
@@ -699,14 +699,17 @@ const IS_LIVE = window.CASA_FORCE_LIVE === true || (LIVE.hosts.includes(location
 /* ---------- People and seed data ---------- */
 let PEOPLE = [
   { id: "micha", name: "Micha", stamm: "micha", super: true },
+  { id: "martina", name: "Martina", stamm: "micha", super: false, companion: true },
   { id: "leon", name: "Leon", stamm: "micha", super: false },
   { id: "marilen", name: "Marilen", stamm: "micha", super: false },
   { id: "olivia", name: "Olivia", stamm: "micha", super: false },
   { id: "uli", name: "Uli", stamm: "uli", super: true },
+  { id: "svantje", name: "Svantje", stamm: "uli", super: false, companion: true },
   { id: "kaspar", name: "Kaspar", stamm: "uli", super: false },
   { id: "karlina", name: "Karlina", stamm: "uli", super: false },
   { id: "kajus", name: "Kajus", stamm: "uli", super: false },
   { id: "fanny", name: "Fanny", stamm: "fanny", super: true },
+  { id: "kay", name: "Kay", stamm: "fanny", super: false, companion: true },
   { id: "merle", name: "Merle", stamm: "fanny", super: false }
 ];
 const STAMM_NAME = { micha: "Micha", uli: "Uli", fanny: "Fanny" };
@@ -874,7 +877,7 @@ function busy(btn, on, text) {
 /* ---------- State ---------- */
 const TODAY = todayISO();
 const thisYear = Number(TODAY.slice(0, 4));
-const MONTH_LIST = (() => { const out = []; for (let y = 2026; y <= 2027; y++) for (let m = 1; m <= 12; m++) out.push(`${y}-${p2(m)}`); return out; })();
+const MONTH_LIST = (() => { const out = []; for (let y = 2026; y <= 2028; y++) for (let m = 1; m <= 12; m++) out.push(`${y}-${p2(m)}`); return out; })();
 const TODAY_IDX = Math.max(0, MONTH_LIST.indexOf(TODAY.slice(0, 7)));
 const state = {
   tab: "home",
@@ -1083,7 +1086,7 @@ function openYear() {
   { label: "Das Jahr", onMount: (body, layer) => {
     const paint = (anim) => {
       body.querySelector(".y").textContent = y;
-      body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2027;
+      body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2028;
       body.querySelector("[data-grid]").innerHTML = yearGridHTML(y);
       const g = body.querySelector(".ygrid");
       if (anim && !matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(() => requestAnimationFrame(() => g.classList.add("in"))); else g.classList.add("in");
@@ -1113,7 +1116,7 @@ function openQuota() {
   { label: "Freinächte", onMount: (body) => {
     const paint = () => {
       body.querySelector(".y").textContent = y;
-      body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2027;
+      body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2028;
       body.querySelector("[data-rows]").innerHTML = STAMME.map(s => quotaRow(s, y)).join("");
     };
     body.addEventListener("click", e => { const ys = e.target.closest("[data-ys]"); if (ys) { y += Number(ys.dataset.ys); haptic(); paint(); } });
@@ -1593,7 +1596,7 @@ function fmtSync(ms) {
 function openWho() {
   if (IS_LIVE) { openAccount(); return; }
   const u = me();
-  const groups = STAMME.map(s => `<div class="who-stamm">${STAMM_NAME[s]}s Familie</div>` + PEOPLE.filter(p => p.stamm === s).map(p =>
+  const groups = STAMME.map(s => `<div class="who-stamm">${STAMM_NAME[s]}s Familie</div>` + PEOPLE.filter(p => p.stamm === s && !p.companion).map(p =>
     `<button class="who s-${p.stamm}" data-me="${p.id}" aria-current="${p.id === u.id}"><span class="avatar">${initials(p.name)}</span>
       <span><span class="who-name">${esc(p.name)}</span><br><span class="who-role">${p.super ? "Super-User, bucht direkt, gibt frei" : "Bucht mit Freigabe"}</span></span>
       <svg class="check" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 10.5 3.5 3.5 7.5-8"/></svg></button>`).join("")).join("");

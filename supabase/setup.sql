@@ -79,7 +79,8 @@ create table if not exists public.high_season (
 alter table public.high_season enable row level security;
 insert into public.high_season (year, starts, ends) values
   (2026, '2026-06-29', '2026-09-01'),   -- Hessen ab 29.6., NRW bis 1.9.
-  (2027, '2027-06-28', '2027-08-31')    -- Hessen ab 28.6., NRW bis 31.8.
+  (2027, '2027-06-28', '2027-08-31'),   -- Hessen ab 28.6., NRW bis 31.8.
+  (2028, '2028-07-01', '2028-08-31')    -- alle Sommerferien (HE/HH 3.7.–11.8., NRW 10.7.–22.8.) liegen in Juli/August
 on conflict (year) do update set starts = excluded.starts, ends = excluded.ends;
 
 -- ---------------------------------------------------------------------
@@ -316,13 +317,16 @@ create trigger casa_guard_signup before insert on auth.users
 -- ---------------------------------------------------------------------
 insert into public.people (id, name, stamm, is_super, sort) values
   ('micha',   'Micha',   'micha', true,  10),
-  ('leon',    'Leon',    'micha', false, 11),
-  ('marilen', 'Marilen', 'micha', false, 12),
-  ('olivia',  'Olivia',  'micha', false, 13),
+  ('martina', 'Martina', 'micha', false, 11),   -- nur Mitreisende (ohne E-Mail = kein Login)
+  ('leon',    'Leon',    'micha', false, 12),
+  ('marilen', 'Marilen', 'micha', false, 13),
+  ('olivia',  'Olivia',  'micha', false, 14),
   ('uli',     'Uli',     'uli',   true,  20),
-  ('kaspar',  'Kaspar',  'uli',   false, 21),
-  ('karlina', 'Karlina', 'uli',   false, 22),
-  ('kajus',   'Kajus',   'uli',   false, 23),
+  ('svantje', 'Svantje', 'uli',   false, 21),   -- nur Mitreisende
+  ('kaspar',  'Kaspar',  'uli',   false, 22),
+  ('karlina', 'Karlina', 'uli',   false, 23),
+  ('kajus',   'Kajus',   'uli',   false, 24),
   ('fanny',   'Fanny',   'fanny', true,  30),
-  ('merle',   'Merle',   'fanny', false, 31)
+  ('kay',     'Kay',     'fanny', false, 31),   -- nur Mitreisende
+  ('merle',   'Merle',   'fanny', false, 32)
 on conflict (id) do nothing;
