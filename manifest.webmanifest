@@ -1,0 +1,17 @@
+{
+  "name": "Casa la Paz",
+  "short_name": "Casa la Paz",
+  "description": "Belegungsplan für das Haus in Vinaròs",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EDF0EF",
+  "theme_color": "#EDF0EF",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}

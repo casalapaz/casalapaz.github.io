@@ -1,0 +1,47 @@
+# Wöchentliche Sicherung aller Buchungen und Personen, verschlüsselt im Repo abgelegt.
+# Das Repo ist öffentlich, deshalb wird die Datei mit BACKUP_PASSPHRASE verschlüsselt.
+# Entschlüsseln: gpg --decrypt backups/casa-la-paz-latest.json.gpg > backup.json
+name: Wöchentliche Sicherung
+on:
+  schedule:
+    - cron: "41 3 * * 0"   # sonntags 03:41 UTC
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          set -euo pipefail
+          hdr=(-H "apikey: $SUPABASE_SECRET")
+          # Alte "service_role"-Schlüssel (beginnen mit eyJ) brauchen zusätzlich den Authorization-Header
+          case "$SUPABASE_SECRET" in eyJ*) hdr+=(-H "Authorization: Bearer $SUPABASE_SECRET");; esac
+          curl -sf "${hdr[@]}" "$SUPABASE_URL/rest/v1/bookings?select=*&order=arrive.asc" > bookings.json
+          curl -sf "${hdr[@]}" "$SUPABASE_URL/rest/v1/people?select=*&order=sort.asc" > people.json
+          jq -n --slurpfile b bookings.json --slurpfile p people.json \
+            '{exported_at: (now | todate), people: $p[0], bookings: $b[0]}' > backup.json
+          echo "Buchungen: $(jq length bookings.json), Personen: $(jq length people.json)"
+          test "$(jq length people.json)" -gt 0
+      - name: Verschlüsseln und ablegen
+        env:
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          test -n "$PASSPHRASE"
+          mkdir -p backups
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PASSPHRASE" --symmetric --cipher-algo AES256 \
+            -o "backups/casa-la-paz-$(date -u +%Y-%m-%d).json.gpg" backup.json
+          cp "backups/casa-la-paz-$(date -u +%Y-%m-%d).json.gpg" backups/casa-la-paz-latest.json.gpg
+          # nur die letzten 12 Wochen behalten
+          ls -1 backups/casa-la-paz-20*.json.gpg | sort | head -n -12 | xargs -r git rm -q --
+          rm -f backup.json bookings.json people.json
+          git config user.name "casa-backup"; git config user.email "actions@users.noreply.github.com"
+          git add backups
+          git diff --cached --quiet || git commit -m "Sicherung $(date -u +%Y-%m-%d)"
+          git push

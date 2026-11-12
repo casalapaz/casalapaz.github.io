@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF0EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1A22" media="(prefers-color-scheme: dark)">
+<title>Casa la Paz</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Casa la Paz">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Casa la Paz – Belegungsplan
+   Grund: kühler Kalkputz. Schrift: Tinte (Nachtmeer). Drei Stammfarben: Mar, Granada, Olivo.
+   Schrift: SF Pro (iPhone) für alles, Titel fett und eng; Geist als Ersatz auf anderen Geräten.
+   Layout: Übersicht als Kacheln auf einem Bildschirm; Kalender ein Monat pro Seite, seitlich wischen mit Einrasten. */
+:root {
+  --ground: #EDF0EF;
+  --surface: #FFFFFF;
+  --surface-2: #F4F6F5;
+  --well: #E3E8E7;
+  --ink: #15232E;
+  --ink-2: rgba(21, 35, 46, 0.64);
+  --ink-3: rgba(21, 35, 46, 0.40);
+  --line: rgba(21, 35, 46, 0.08);
+  --line-2: rgba(21, 35, 46, 0.14);
+  --micha: #1F5AA6;
+  --uli: #B23440;
+  --fanny: #6B8733;
+  --micha-soft: #DCE6F3;
+  --uli-soft: #F3DFE0;
+  --fanny-soft: #E5ECD8;
+  --azahar: #C98A0E;
+  --f-NRW: #7C8CA0;
+  --f-HE: #B08A57;
+  --f-HH: #4F9A97;
+  --ok: #2F7D5B;
+  --sol: #D9822B;
+  --behind: #0E1820;
+  --shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 1px 2px rgba(21,35,46,.05), 0 8px 24px -12px rgba(21,35,46,.18);
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Geist", "Helvetica Neue", Arial, sans-serif;
+  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Geist", "Helvetica Neue", Arial, sans-serif;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  --spring: cubic-bezier(.34, 1.4, .64, 1);
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0F1A22; --surface: #17242E; --surface-2: #1C2B36; --well: #22323E;
+    --ink: #ECF0F1; --ink-2: rgba(236, 240, 241, 0.66); --ink-3: rgba(236, 240, 241, 0.40);
+    --line: rgba(236, 240, 241, 0.08); --line-2: rgba(236, 240, 241, 0.15);
+    --micha: #5B90D6; --uli: #D9616B; --fanny: #98B45E;
+    --micha-soft: rgba(91,144,214,.2); --uli-soft: rgba(217,97,107,.2); --fanny-soft: rgba(152,180,94,.2);
+    --azahar: #E3AE45; --behind: #03080C; --sol: #F0A04E;
+    --shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px -14px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0F1A22; --surface: #17242E; --surface-2: #1C2B36; --well: #22323E;
+  --ink: #ECF0F1; --ink-2: rgba(236, 240, 241, 0.66); --ink-3: rgba(236, 240, 241, 0.40);
+  --line: rgba(236, 240, 241, 0.08); --line-2: rgba(236, 240, 241, 0.15);
+  --micha: #5B90D6; --uli: #D9616B; --fanny: #98B45E;
+  --micha-soft: rgba(91,144,214,.2); --uli-soft: rgba(217,97,107,.2); --fanny-soft: rgba(152,180,94,.2);
+  --azahar: #E3AE45; --behind: #03080C; --sol: #F0A04E;
+  --shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px -14px rgba(0,0,0,.7);
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--behind); color: var(--ink); font-family: var(--ui); font-size: 17px; line-height: 1.4; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; overflow: hidden; overscroll-behavior: none; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; text-align: inherit; }
+:focus-visible { outline: 2px solid var(--micha); outline-offset: 2px; border-radius: 8px; }
+.num { font-variant-numeric: tabular-nums; }
+.s-micha { --c: var(--micha); --cs: var(--micha-soft); }
+.s-uli { --c: var(--uli); --cs: var(--uli-soft); }
+.s-fanny { --c: var(--fanny); --cs: var(--fanny-soft); }
+
+/* ---------- Frame ---------- */
+.app { position: fixed; inset: 0; display: flex; flex-direction: column; background: var(--ground); transform-origin: 50% 0; overflow: hidden;
+  transition: transform .5s var(--ease), border-radius .5s var(--ease), filter .5s var(--ease); }
+body.sheet-up .app { transform: translateY(calc(var(--sat) + 10px)) scale(.93); border-radius: 22px; filter: brightness(.92); }
+body.sheet-drag .app { transition: none; }
+.stage { flex: 1; position: relative; overflow: hidden; }
+.view { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: calc(var(--sat) + 12px) 20px 20px; }
+.view[hidden] { display: none !important; }
+.view.enter { animation: enter .35s var(--ease) both; }
+@keyframes enter { from { opacity: 0; transform: translateY(6px); } }
+
+.top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+.wordmark { font-family: var(--display); font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+.wordmark small { font-family: var(--ui); font-size: 13px; font-weight: 400; color: var(--ink-3); letter-spacing: 0; margin-left: 6px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600; color: #fff; background: var(--c, var(--ink)); flex: none;
+  box-shadow: 0 0 0 2px var(--ground), 0 0 0 3px var(--line-2); transition: transform .2s var(--spring); }
+.avatar:active { transform: scale(.9); }
+h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height: 1.06; letter-spacing: -.035em; margin: 10px 0 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 650; font-size: 22px; letter-spacing: -.025em; margin: 0; line-height: 1.15; text-wrap: balance; }
+.lead { color: var(--ink-2); margin: 6px 0 0; font-size: 16px; line-height: 1.35; }
+.section { margin-top: 30px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.muted { color: var(--ink-2); }
+.faint { color: var(--ink-3); }
+.panel { background: var(--surface); border-radius: 22px; box-shadow: var(--shadow); }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; padding: 0 22px; border-radius: 17px; font-size: 17px; font-weight: 600; letter-spacing: -.01em; text-align: center; text-decoration: none; transition: transform .18s var(--spring), opacity .2s, background .2s; }
+.btn:active { transform: scale(.97); }
+.btn-ink { background: var(--ink); color: var(--ground); }
+.btn-c { background: var(--c); color: #fff; }
+.btn-soft { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.btn-danger { background: transparent; color: var(--uli); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--uli) 40%, transparent); }
+.btn-wide { width: 100%; }
+.btn[disabled] { opacity: .35; pointer-events: none; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: var(--surface); box-shadow: var(--shadow); flex: none; transition: transform .2s var(--spring), opacity .2s; }
+.icon-btn:active { transform: scale(.9); }
+.icon-btn[disabled] { opacity: .3; pointer-events: none; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.chip-ok { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.chip-wait { background: color-mix(in srgb, var(--azahar) 18%, transparent); color: color-mix(in srgb, var(--azahar) 70%, var(--ink)); }
+.chip-no { background: color-mix(in srgb, var(--uli) 13%, transparent); color: var(--uli); }
+.chip-off { background: var(--surface-2); color: var(--ink-3); }
+.chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.chip-wait .dot { animation: breathe 1.8s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .25; } }
+
+/* ---------- Home: one screen of tiles ---------- */
+#v-home { padding: calc(var(--sat) + 10px) 16px 12px; }
+.home { height: 100%; min-height: 430px; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 10px; }
+.hello { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 4px; }
+.hello h1 { margin: 0; font-size: 30px; }
+.status { margin: 2px 0 0; font-size: 14.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hello > div { min-width: 0; }
+.hello-req { padding: 0; min-height: 44px; }
+.hello-req h1 { font-size: 30px; }
+.hero { display: block; width: 100%; padding: 14px 16px 13px; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, var(--cs, transparent) 0%, transparent 65%); pointer-events: none; }
+.hero > * { position: relative; }
+.hero-k { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--ink-2); font-weight: 500; }
+.hero-date { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1.1; letter-spacing: -.03em; margin-top: 4px; }
+.hero-meta { color: var(--ink-2); margin-top: 3px; font-size: 14.5px; }
+.hero:active, .tile:active { transform: scale(.98); }
+.hero, .tile { transition: transform .25s var(--spring); }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; min-height: 0; }
+.tile { display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px 13px; min-height: 0; overflow: hidden; position: relative; }
+.tile-t { font-weight: 650; font-size: 17px; letter-spacing: -.015em; display: flex; justify-content: space-between; align-items: center; }
+.tile-t svg { color: var(--ink-3); }
+.tile-s { font-size: 13px; color: var(--ink-2); margin-top: 2px; line-height: 1.3; }
+.tile-big { font-family: var(--display); font-weight: 700; font-size: 44px; letter-spacing: -.04em; line-height: 1; }
+.tile-badge { position: absolute; top: 14px; right: 14px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px; background: var(--uli); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+.mini-month { flex: 1; min-height: 0; max-height: 96px; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(var(--r), minmax(0, 1fr)); gap: 3px; margin-top: 8px; }
+.mini-month i { border-radius: 3px; background: var(--well); }
+.mini-month i.x { visibility: hidden; }
+.mini-month i.b { background: var(--c); }
+.mini-month i.p { background: repeating-linear-gradient(135deg, var(--c) 0 2px, transparent 2px 4px); box-shadow: inset 0 0 0 1px var(--c); }
+.mini-month i.t { box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 3px var(--ink); }
+.mini-year { display: grid; grid-template-rows: repeat(12, minmax(0, 1fr)); gap: 2px; margin-top: 8px; flex: 1; min-height: 0; max-height: 100px; }
+.mini-year span { display: grid; grid-template-columns: repeat(31, 1fr); gap: 1px; }
+.mini-year i { border-radius: 1px; background: var(--well); }
+.mini-year i.x { visibility: hidden; }
+.mini-year i.b { background: var(--c); }
+.mini-year i.p { background: color-mix(in srgb, var(--c) 45%, transparent); }
+.ring-wrap { display: flex; align-items: center; gap: 12px; }
+.ring { width: 66px; height: 66px; flex: none; }
+.ring .bg { stroke: var(--well); }
+.ring .fg { stroke: var(--c); transition: stroke-dashoffset 1s var(--ease); }
+.ring .pd { stroke: color-mix(in srgb, var(--c) 35%, transparent); }
+.ring text { font-family: var(--display); font-weight: 700; font-size: 19px; fill: var(--ink); letter-spacing: -.03em; }
+.ring text.rl { font-family: var(--ui); font-size: 9.5px; font-weight: 600; fill: var(--ink-3); letter-spacing: 0; }
+.ring { width: 64px; height: 64px; }
+@media (max-height: 640px) { .ring { width: 52px; height: 52px; } .tile-big { font-size: 34px; } .tile-s { font-size: 12.5px; } }
+@media (max-height: 600px) { .tile .sub { display: none; } .hero-k span:first-child { font-size: 13px; } .mini-month { gap: 2px; } .tile { padding: 12px 13px 11px; } }
+.cta { min-height: 52px; }
+
+/* ---------- Calendar: one month per page ---------- */
+#v-cal { overflow: hidden; display: flex; flex-direction: column; padding: calc(var(--sat) + 10px) 0 0; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px 0 20px; min-height: 58px; }
+.cal-title { font-family: var(--display); font-weight: 700; font-size: 30px; letter-spacing: -.04em; line-height: 1.05; white-space: nowrap; }
+.cal-title .y { color: var(--ink-3); font-weight: 600; }
+.cal-sub { font-size: 13px; color: var(--ink-2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.today-btn { display: inline-flex; align-items: center; gap: 6px; height: 46px; padding: 0 20px; min-width: 112px; justify-content: center; border-radius: 999px; background: var(--ink); color: var(--ground); font-size: 16px; font-weight: 600; box-shadow: 0 8px 18px -10px rgba(0,0,0,.5); transition: transform .2s var(--spring), opacity .3s, background .3s, color .3s; flex: none; }
+.today-btn:active { transform: scale(.94); }
+.today-btn { font-size: 17px; font-weight: 650; background: var(--micha); color: #fff; box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--micha) 80%, transparent); }
+.today-btn .ar { display: inline-grid; width: 18px; transition: transform .35s var(--spring), opacity .25s, width .3s var(--ease); }
+.today-btn.here { background: var(--surface-2); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line); pointer-events: none; }
+.today-btn.here .ar { opacity: 0; width: 0; transform: scale(.4); }
+.today-btn.r { flex-direction: row-reverse; }
+.wd { display: grid; grid-template-columns: repeat(7, 1fr); font-size: 13px; font-weight: 600; color: var(--ink-3); text-align: center; padding: 8px 12px 6px; }
+.wd span:nth-child(n+6) { color: color-mix(in srgb, var(--ink-3) 70%, transparent); }
+.pager { flex: 1; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; min-height: 0; }
+.pager::-webkit-scrollbar { display: none; }
+.pager.jump { animation: jump .35s var(--ease); }
+@keyframes jump { from { opacity: .2; transform: scale(.985); } }
+.mpage { flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always; display: flex; flex-direction: column; padding: 0 12px; min-height: 0; }
+.mgrid { flex: 1; display: grid; grid-template-rows: repeat(var(--rows), 1fr); min-height: 0; }
+.wk { position: relative; border-top: 1px solid var(--line); min-height: 0; overflow: hidden; }
+.cells { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); }
+.c { position: relative; display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; transition: background .25s; }
+.c.blank { pointer-events: none; }
+.c .n { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -.02em; transition: background .2s, color .2s, transform .25s var(--spring); }
+.c:active .n { transform: scale(.86); }
+.c.we .n { color: var(--ink-2); }
+.c.past .n { color: var(--ink-3); }
+.c.hol .n { font-weight: 700; }
+.c.today .n { background: var(--ink); color: var(--ground); font-weight: 700; }
+.legend i.hsl { height: 3px; border-radius: 2px; background: var(--sol); }
+.c.nogo { opacity: .28; }
+.c.in { background: color-mix(in srgb, var(--me) 13%, transparent); }
+.c.sel-a, .c.sel-b { background: color-mix(in srgb, var(--me) 13%, transparent); }
+.c.sel-a { border-radius: 16px 0 0 16px; }
+.c.sel-b { border-radius: 0 16px 16px 0; }
+.c.sel-a.sel-b { border-radius: 16px; }
+.c.sel-a .n, .c.sel-b .n { background: var(--me); color: #fff; font-weight: 700; }
+.c.solo { border-radius: 16px; }
+.c.pick .n { animation: pick .45s var(--spring); }
+@keyframes pick { 40% { transform: scale(1.22); } }
+.hols { position: absolute; left: 0; right: 0; top: 41px; height: 17px; pointer-events: none; }
+.hl { position: absolute; top: 0; height: 17px; display: inline-flex; align-items: center; padding: 0 6px; border-radius: 6px; background: var(--well); color: var(--ink-2); font-size: 10.5px; font-weight: 600; white-space: nowrap; letter-spacing: -.01em; }
+.hl.r { transform: translateX(-100%); }
+.bars { position: absolute; left: 0; right: 0; top: 43px; pointer-events: none; }
+.bars.has-h { top: 61px; }
+.bar { position: absolute; height: 26px; background: var(--c); color: #fff; font-size: 13.5px; font-weight: 650; line-height: 26px; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: auto; letter-spacing: -.01em; }
+.bar.ra { border-top-left-radius: 13px; border-bottom-left-radius: 13px; }
+.bar.rb { border-top-right-radius: 13px; border-bottom-right-radius: 13px; }
+.bar.pend { background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 34%, var(--surface)) 0 5px, color-mix(in srgb, var(--c) 18%, var(--surface)) 5px 10px); color: var(--c); box-shadow: inset 0 0 0 1.5px var(--c); }
+.bar.grow { animation: grow .7s var(--ease) both; }
+@keyframes grow { from { clip-path: inset(0 100% 0 0 round 12px); } to { clip-path: inset(0 0 0 0 round 0); } }
+.hsl-line { position: absolute; top: 0; height: 3px; background: var(--sol); pointer-events: none; z-index: 1; }
+.hsl-line.a { border-top-left-radius: 2px; border-bottom-left-radius: 2px; }
+.hsl-line.b { border-top-right-radius: 2px; border-bottom-right-radius: 2px; }
+.fer { position: absolute; left: 0; right: 0; bottom: 9px; display: flex; flex-direction: column; gap: 3px; pointer-events: none; }
+.fl { position: relative; height: 3px; }
+.fseg { position: absolute; top: 0; height: 4px; background: radial-gradient(circle, var(--ink-3) 1.5px, transparent 2px) 0 50% / 8px 4px repeat-x; }
+.mfoot { flex: none; display: flex; align-items: center; gap: 10px; padding: 8px 4px 10px; min-height: 60px; }
+.fnote { flex: 1; font-size: 12.5px; line-height: 1.35; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 2px 12px; justify-content: center; text-align: center; }
+.fnote span { white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+.fnote i { width: 20px; height: 4px; background: radial-gradient(circle, var(--ink-3) 1.5px, transparent 2px) 0 50% / 8px 4px repeat-x; display: inline-block; }
+.fnote b { font-weight: 600; color: var(--ink-2); }
+
+/* Selection bar */
+.selbar { position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 9; display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 18px; border-radius: 20px;
+  background: var(--ink); color: var(--ground); box-shadow: 0 18px 40px -14px rgba(0,0,0,.55);
+  transform: translateY(24px) scale(.97); opacity: 0; visibility: hidden; pointer-events: none; transition: transform .45s var(--ease), opacity .3s, visibility 0s .45s; }
+.selbar.on { transform: none; opacity: 1; visibility: visible; pointer-events: auto; transition: transform .45s var(--spring), opacity .3s, visibility 0s; }
+.selbar p { margin: 0; flex: 1; font-size: 16px; line-height: 1.3; font-weight: 600; }
+.selbar p small { display: block; font-weight: 400; opacity: .7; font-size: 14px; margin-top: 1px; }
+.selbar button { height: 42px; padding: 0 14px; border-radius: 13px; background: color-mix(in srgb, var(--ground) 16%, transparent); font-size: 15px; font-weight: 600; flex: none; }
+
+/* ---------- Requests ---------- */
+.req-list { padding: 4px 16px; }
+.req { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 16px 0; align-items: start; }
+.req + .req { border-top: 1px solid var(--line); }
+.req .avatar { width: 40px; height: 40px; box-shadow: none; }
+.req-name { font-weight: 600; }
+.req-date { font-family: var(--display); font-weight: 650; font-size: 18px; letter-spacing: -.025em; margin-top: 1px; }
+.req-meta { font-size: 14px; color: var(--ink-2); margin-top: 4px; }
+.req-actions { display: flex; gap: 8px; margin-top: 12px; }
+.req-actions .btn { min-height: 44px; border-radius: 13px; font-size: 15px; padding: 0 16px; flex: 1; }
+.reason { margin-top: 8px; font-size: 14px; color: var(--ink-2); padding-left: 10px; border-left: 2px solid var(--line-2); font-style: italic; }
+.none-yet { padding: 20px; color: var(--ink-2); }
+.empty { padding: 22px 20px; }
+.empty p { margin: 0 0 16px; color: var(--ink-2); }
+
+/* ---------- Tab bar ---------- */
+.tabbar { flex: none; display: grid; grid-template-columns: repeat(3, 1fr); padding: 6px 12px calc(var(--sab) + 4px); position: relative; z-index: 8;
+  background: color-mix(in srgb, var(--ground) 82%, transparent); backdrop-filter: saturate(1.8) blur(22px); -webkit-backdrop-filter: saturate(1.8) blur(22px); border-top: 1px solid var(--line); }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0 5px; font-size: 11.5px; font-weight: 600; color: var(--ink-3); position: relative; transition: color .2s; }
+.tab svg { width: 27px; height: 27px; transition: transform .3s var(--spring); }
+.tab[aria-selected="true"] { color: var(--ink); }
+.tab:active svg { transform: scale(.86); }
+.tab .badge { position: absolute; top: 2px; left: calc(50% + 7px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--uli); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+
+/* ---------- Sheets ---------- */
+.layer { position: fixed; inset: 0; z-index: 50; }
+.scrim { position: absolute; inset: 0; background: rgba(5, 12, 18, .42); opacity: 0; transition: opacity .45s var(--ease); }
+.layer.open .scrim { opacity: 1; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: calc(100% - var(--sat) - 22px); background: var(--surface); border-radius: 26px 26px 0 0; display: flex; flex-direction: column;
+  transform: translateY(105%); transition: transform .5s var(--ease); box-shadow: 0 -10px 40px -20px rgba(0,0,0,.4); max-width: 640px; margin: 0 auto; }
+.layer.open .sheet { transform: translateY(var(--dy, 0px)); }
+.layer.drag .sheet { transition: none; }
+.sheet-head { flex: none; padding: 8px 20px 4px; touch-action: none; }
+.grabber { width: 38px; height: 5px; border-radius: 3px; background: var(--line-2); margin: 0 auto 10px; }
+.sheet-body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 20px calc(var(--sab) + 22px); overscroll-behavior: contain; }
+.sheet-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; }
+.sheet h2 { font-size: 26px; font-weight: 700; letter-spacing: -.035em; }
+.x-btn { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); flex: none; }
+.band { height: 6px; border-radius: 3px; background: var(--c); margin: 14px 0 18px; }
+.band.pend { background: repeating-linear-gradient(135deg, var(--c) 0 4px, transparent 4px 8px); box-shadow: inset 0 0 0 1px var(--c); }
+.field-group { background: var(--surface-2); border-radius: 18px; box-shadow: inset 0 0 0 1px var(--line); margin-top: 14px; }
+.frow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 0 12px 0 16px; }
+.frow + .frow { border-top: 1px solid var(--line); }
+.frow-label { color: var(--ink-2); font-size: 15px; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper button { display: grid; place-items: center; text-align: center; width: 38px; height: 38px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2); font-size: 21px; line-height: 1; color: var(--ink); transition: opacity .2s, transform .15s; }
+.stepper button:active { transform: scale(.9); }
+.stepper button[disabled] { opacity: .3; pointer-events: none; box-shadow: inset 0 0 0 1px var(--line); }
+.stepper .v { min-width: 112px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 16px; }
+.datepick { position: relative; border-radius: 10px; }
+.datepick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; -webkit-appearance: none; appearance: none; }
+.datepick .v { text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 4px; }
+.people { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 14px; }
+.pchip { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 5px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2); font-size: 15px; font-weight: 500; color: var(--ink-2); transition: all .2s; }
+.pchip .mini { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--well); color: var(--ink-2); font-size: 12px; font-weight: 700; transition: all .2s; }
+.pchip[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--c); background: var(--cs); }
+.pchip[aria-pressed="true"] .mini { background: var(--c); color: #fff; }
+.pchip[disabled] { cursor: default; }
+textarea.note { width: 100%; border: 0; background: transparent; resize: none; padding: 14px 16px; min-height: 64px; font-size: 16px; line-height: 1.4; outline: none; }
+textarea.note::placeholder { color: var(--ink-3); }
+.impact { margin-top: 14px; padding: 16px; border-radius: 18px; background: var(--cs); }
+.impact-line { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; padding: 3px 0; }
+.impact-line b { font-variant-numeric: tabular-nums; }
+.impact-big { font-family: var(--display); font-weight: 700; font-size: 26px; letter-spacing: -.03em; }
+.impact-note { font-size: 14px; color: var(--ink-2); margin-top: 8px; line-height: 1.35; }
+.err { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--uli) 12%, transparent); color: var(--uli); font-size: 15px; }
+.actions { display: grid; gap: 10px; margin-top: 20px; }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.kv:first-child { border-top: 0; }
+.kv span:first-child { color: var(--ink-2); }
+.kv span:last-child { text-align: right; font-weight: 500; }
+.timeline { margin: 20px 0 0; padding: 0; list-style: none; }
+.timeline li { position: relative; padding: 0 0 14px 22px; font-size: 15px; }
+.timeline li::before { content: ""; position: absolute; left: 4px; top: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
+.timeline li::after { content: ""; position: absolute; left: 8px; top: 18px; bottom: 2px; width: 1px; background: var(--line-2); }
+.timeline li:last-child::after { display: none; }
+.timeline li.ok::before { background: var(--ok); }
+.timeline li.wait::before { background: var(--azahar); }
+.timeline li.no::before { background: var(--uli); }
+.timeline small { display: block; color: var(--ink-3); font-size: 13px; }
+/* year sheet */
+.year-switch { display: flex; align-items: center; gap: 8px; }
+.year-switch .y { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -.03em; min-width: 52px; text-align: center; }
+.ygrid { display: grid; grid-template-columns: 34px 1fr; row-gap: 6px; margin-top: 14px; }
+.ym { font-size: 12.5px; color: var(--ink-3); align-self: center; }
+.yrow { display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px; height: 18px; border-radius: 4px; }
+.yrow:active { opacity: .6; }
+.yc { border-radius: 3px; background: var(--well); opacity: 0; transform: scaleY(.3); }
+.ygrid.in .yc { opacity: 1; transform: none; transition: opacity .5s ease, transform .6s var(--spring); transition-delay: calc(var(--m) * 40ms + var(--d) * 5ms); }
+.yc.none { visibility: hidden; }
+.yc.past:not(.b) { opacity: .45 !important; }
+.yc.hs { box-shadow: inset 0 -2px 0 var(--sol); }
+.yc.b { background: var(--c); }
+.yc.b.pend { background: repeating-linear-gradient(135deg, var(--c) 0 2px, transparent 2px 4px); box-shadow: inset 0 0 0 1px var(--c); }
+.yc.today { box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 3px var(--ink); position: relative; z-index: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); display: inline-block; }
+.legend i.pend { background: repeating-linear-gradient(135deg, var(--ink-2) 0 2px, transparent 2px 4px); box-shadow: inset 0 0 0 1px var(--ink-2); }
+/* quota sheet */
+.q { padding: 16px 0; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; }
+.q + .q { border-top: 1px solid var(--line); }
+.q-name { font-weight: 650; display: flex; align-items: center; gap: 8px; }
+.q-name::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.q-num { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -.03em; }
+.q-num small { font-family: var(--ui); font-weight: 500; letter-spacing: 0; font-size: 13px; color: var(--ink-3); }
+.ticks { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(21, 1fr); gap: 3px; margin: 8px 0 4px; }
+.tick { height: 20px; border-radius: 4px; background: var(--well); }
+.tick.on { background: var(--c); }
+.tick.pend { background: repeating-linear-gradient(135deg, var(--c) 0 2px, transparent 2px 4px); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 60%, transparent); }
+.q-foot { grid-column: 1 / -1; font-size: 14px; color: var(--ink-2); display: flex; justify-content: space-between; gap: 10px; }
+.q-foot b { color: var(--ink); font-weight: 650; }
+.q-over b { color: var(--c); }
+/* who */
+.who-stamm { font-size: 13px; color: var(--ink-3); margin: 18px 0 6px; }
+.who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 6px 4px; border-radius: 14px; }
+.who:active { background: var(--surface-2); }
+.who .avatar { width: 38px; height: 38px; box-shadow: none; }
+.who-name { font-weight: 600; }
+.who-role { font-size: 13px; color: var(--ink-2); }
+.who .check { margin-left: auto; color: var(--c); opacity: 0; }
+.who[aria-current="true"] .check { opacity: 1; }
+.proto { margin-top: 22px; padding: 14px 16px; border-radius: 16px; background: var(--surface-2); font-size: 14px; color: var(--ink-2); line-height: 1.45; }
+
+/* ---------- Toast ---------- */
+.toast { position: fixed; left: 50%; top: calc(var(--sat) + 10px); z-index: 90; transform: translate(-50%, -160%); padding: 12px 18px; border-radius: 18px; background: var(--ink); color: var(--ground); font-size: 15px; font-weight: 600; box-shadow: 0 14px 30px -12px rgba(0,0,0,.5); transition: transform .5s var(--ease); width: max-content; max-width: calc(100% - 32px); text-align: center; line-height: 1.3; }
+.toast.on { transform: translate(-50%, 0); }
+
+/* ---------- Intro ---------- */
+.splash { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--ground); transition: opacity .55s var(--ease) .12s, visibility 0s .7s; }
+.sp-mark { text-align: center; opacity: 0; filter: blur(10px); transform: translateY(10px) scale(.96); transition: opacity .8s ease, filter .9s var(--ease), transform 2.2s var(--ease); }
+.sp-name { font-family: var(--display); font-weight: 700; font-size: 38px; letter-spacing: -.045em; line-height: 1; }
+.sp-sub { margin-top: 8px; font-size: 15px; font-weight: 500; color: var(--ink-3); letter-spacing: .02em; }
+.sp-line { display: flex; justify-content: center; gap: 5px; margin-top: 18px; height: 4px; }
+.sp-line i { display: block; width: 0; height: 4px; border-radius: 2px; background: var(--c); transition: width .7s var(--ease); }
+.splash.in .sp-mark { opacity: 1; filter: none; transform: none; }
+.splash.in .sp-line i { width: 22px; }
+.splash.in .sp-line i:nth-child(1) { transition-delay: .35s; }
+.splash.in .sp-line i:nth-child(2) { transition-delay: .5s; }
+.splash.in .sp-line i:nth-child(3) { transition-delay: .65s; }
+.splash.out { opacity: 0; visibility: hidden; pointer-events: none; }
+.splash.out .sp-mark { opacity: 0; filter: blur(8px); transform: scale(1.06); transition: opacity .4s ease, filter .45s var(--ease), transform .55s var(--ease); }
+/* ---------- Hochsaison ---------- */
+.hs-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 650; color: var(--sol); vertical-align: 0; }
+.hs-chip svg { flex: none; }
+.cal-sub .hs-chip { margin-right: 5px; }
+.hs-warn { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin-top: 14px; padding: 14px 16px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow), inset 0 0 0 1.5px color-mix(in srgb, var(--sol) 55%, transparent); animation: enter .35s var(--ease) both; }
+.hs-warn[hidden] { display: none; }
+.hs-warn .ico { grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--sol); color: #fff; }
+.hs-warn b { font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+.hs-warn p { margin: 0; font-size: 14.5px; line-height: 1.4; color: var(--ink-2); }
+.req-hs { margin-top: 6px; font-size: 13.5px; color: var(--ink-2); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.req-hs .dots { display: inline-flex; gap: 3px; }
+.req-hs .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); }
+.req-hs .dots i.on { background: var(--ok); }
+
+/* ---------- Anmeldung (nur Live) ---------- */
+.login { position: fixed; inset: 0; z-index: 80; background: var(--ground); overflow-y: auto; display: flex; flex-direction: column;
+  padding: calc(var(--sat) + 28px) 24px calc(var(--sab) + 24px); transition: opacity .45s var(--ease), transform .55s var(--ease); }
+.login[hidden] { display: none !important; }
+.login.leave { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+.lg-mark { text-align: center; padding: 6vh 0 4vh; }
+.lg-mark .sp-name { font-size: 32px; }
+.lg-mark .sp-line i { width: 22px; }
+.lg-card { width: 100%; max-width: 420px; margin: 0 auto; }
+.lg-card h1 { font-size: 30px; margin: 0; }
+.lg-card .lead { font-size: 17px; margin-top: 8px; }
+.lg-input { display: block; width: 100%; min-height: 60px; padding: 0 18px; border: 0; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
+  font-size: 19px; color: var(--ink); outline: none; -webkit-appearance: none; appearance: none; transition: box-shadow .2s; margin-top: 22px; }
+.lg-input:focus { box-shadow: var(--shadow), inset 0 0 0 2px var(--micha); }
+.lg-input::placeholder { color: var(--ink-3); }
+.lg-code { font-size: 32px; font-weight: 650; letter-spacing: .32em; text-align: center; font-variant-numeric: tabular-nums; padding-left: calc(18px + .32em); }
+.lg-card .btn { margin-top: 14px; }
+.lg-links { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.lg-link { min-height: 44px; font-size: 16px; font-weight: 500; color: var(--micha); }
+.lg-link[disabled] { color: var(--ink-3); pointer-events: none; }
+.lg-hint { margin-top: auto; padding-top: 28px; text-align: center; font-size: 14px; color: var(--ink-3); line-height: 1.45; }
+.lg-step { animation: enter .35s var(--ease) both; }
+.btn.busy { opacity: .6; pointer-events: none; }
+.acct { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.acct .avatar { width: 56px; height: 56px; font-size: 20px; box-shadow: none; }
+.acct-name { font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
+.acct-role { font-size: 15px; color: var(--ink-2); margin-top: 3px; }
+.acct-list { margin-top: 18px; }
+body.booting .home > *, body.booting .tabbar { opacity: 0; transform: translateY(14px); }
+body.reveal .home > *, body.reveal .tabbar { opacity: 1; transform: none; transition: opacity .6s ease, transform .75s var(--ease); }
+body.reveal .home > :nth-child(1) { transition-delay: .16s; }
+body.reveal .home > :nth-child(2) { transition-delay: .22s; }
+body.reveal .home > :nth-child(3) { transition-delay: .28s; }
+body.reveal .home > :nth-child(4) { transition-delay: .34s; }
+body.reveal .tabbar { transition-delay: .3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+  .pager { scroll-behavior: auto; }
+}
+@media (max-height: 700px) {
+  h1 { font-size: 28px; margin-top: 4px; }
+  .lead { font-size: 15px; }
+  .hero-date { font-size: 22px; }
+  .hello h1 { font-size: 26px; }
+  .home { gap: 8px; }
+  .cta { min-height: 48px; }
+  .tile-big { font-size: 36px; }
+  .ring { width: 54px; height: 54px; }
+  .cal-title { font-size: 26px; }
+  .c .n { width: 28px; height: 28px; font-size: 17px; }
+  .hols { top: 36px; }
+  .bars { top: 38px; }
+  .bars.has-h { top: 55px; }
+  .mfoot { min-height: 50px; padding: 4px 4px 8px; }
+}
+@media (max-width: 370px) {
+  .view { padding-left: 16px; padding-right: 16px; }
+  .stepper .v { min-width: 96px; font-size: 15px; }
+}
+</style>
+</head>
+<body class="booting">
+<div class="app" id="app">
+  <main class="stage">
+    <section class="view" id="v-home" aria-label="Übersicht"></section>
+    <section class="view" id="v-cal" aria-label="Kalender" hidden></section>
+    <section class="view" id="v-req" aria-label="Anfragen" hidden></section>
+    <div class="selbar" id="selbar" role="status" aria-live="polite"><p></p><button type="button" data-act="sel-cancel"></button></div>
+  </main>
+  <nav class="tabbar" role="tablist" aria-label="Bereiche">
+    <button class="tab" role="tab" data-tab="home" aria-selected="true">
+      <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7.5" height="7.5" rx="2.2"/><rect x="14.5" y="4" width="7.5" height="7.5" rx="2.2"/><rect x="4" y="14.5" width="7.5" height="7.5" rx="2.2"/><rect x="14.5" y="14.5" width="7.5" height="7.5" rx="2.2"/></svg>
+      Übersicht</button>
+    <button class="tab" role="tab" data-tab="cal" aria-selected="false">
+      <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="5.5" width="18" height="16" rx="4"/><path d="M4 10.5h18M9 3.5v4M17 3.5v4"/><path d="M8.5 15h4" stroke-width="2.4"/></svg>
+      Kalender</button>
+    <button class="tab" role="tab" data-tab="req" aria-selected="false">
+      <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5h16v10.5H14l-4.5 3.5V17H5z"/><path d="m9.5 11.8 2.3 2.2 4.7-4.5"/></svg>
+      Anfragen<span class="badge" id="badge" hidden></span></button>
+  </nav>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="login" id="login" hidden></div>
+<div class="splash" id="splash" aria-hidden="true"><div class="sp-mark"><div class="sp-name">Casa la Paz</div><div class="sp-sub">Vinaròs</div><div class="sp-line"><i class="s-micha"></i><i class="s-uli"></i><i class="s-fanny"></i></div></div></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ===================== LOGIC START ===================== */
+const FREE_NIGHTS = 21;
+const RATE = 200 / 7;
+const EXPIRY_DAYS = 21;
+const MAX_NIGHTS = 31;
+const DAY = 864e5;
+const STAMME = ["micha", "uli", "fanny"];
+
+const p2 = n => String(n).padStart(2, "0");
+const D = s => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+const S = t => { const x = new Date(t); return x.getUTCFullYear() + "-" + p2(x.getUTCMonth() + 1) + "-" + p2(x.getUTCDate()); };
+const addDays = (s, n) => S(D(s) + n * DAY);
+const diffDays = (a, b) => Math.round((D(b) - D(a)) / DAY);
+const weekday = s => (new Date(D(s)).getUTCDay() + 6) % 7; // Mo = 0
+const isActive = b => b.status === "confirmed" || b.status === "pending";
+
+function nightsOf(b) { const out = []; for (let d = b.from; d < b.to; d = addDays(d, 1)) out.push(d); return out; }
+
+function conflicts(bookings, stamm, from, to, excludeId) {
+  return bookings.filter(b => isActive(b) && b.id !== excludeId && b.stamm !== stamm && b.from < to && from < b.to);
+}
+
+function stammNights(bookings, stamm, year, statuses, extra) {
+  const set = new Set();
+  const list = bookings.filter(b => b.stamm === stamm && statuses.includes(b.status));
+  if (extra) list.push(extra);
+  for (const b of list) for (const n of nightsOf(b)) if (n.slice(0, 4) === String(year)) set.add(n);
+  return set;
+}
+
+function quota(bookings, stamm, year) {
+  const conf = stammNights(bookings, stamm, year, ["confirmed"]).size;
+  const all = stammNights(bookings, stamm, year, ["confirmed", "pending"]).size;
+  const paid = Math.max(0, conf - FREE_NIGHTS);
+  return { nights: conf, free: Math.min(conf, FREE_NIGHTS), paid, cost: paid * RATE, pending: all - conf, projected: all, projectedPaid: Math.max(0, all - FREE_NIGHTS) };
+}
+
+/* What a planned stay adds for its Stamm: new nights (union), extra paid nights, cost, free nights left. */
+function impact(bookings, draft) {
+  const years = new Set(nightsOf(draft).map(n => n.slice(0, 4)));
+  let newNights = 0, paidDelta = 0, freeLeft = null, lastYear = null;
+  for (const y of years) {
+    const before = stammNights(bookings, draft.stamm, y, ["confirmed", "pending"]).size;
+    const after = stammNights(bookings, draft.stamm, y, ["confirmed", "pending"], draft).size;
+    newNights += after - before;
+    paidDelta += Math.max(0, after - FREE_NIGHTS) - Math.max(0, before - FREE_NIGHTS);
+    freeLeft = Math.max(0, FREE_NIGHTS - after); lastYear = y;
+  }
+  return { nights: diffDays(draft.from, draft.to), newNights, freeUsed: newNights - paidDelta, paidDelta, cost: paidDelta * RATE, freeLeft, year: lastYear };
+}
+
+/* Paid nights attributed to one booking: chronological, first stay of the year uses the free nights. */
+function paidNightsOf(bookings, b) {
+  const statuses = b.status === "confirmed" ? ["confirmed"] : ["confirmed", "pending"];
+  if (!statuses.includes(b.status)) return 0;
+  const mine = bookings.filter(x => x.stamm === b.stamm && statuses.includes(x.status));
+  const order = (x, y) => x.from < y.from ? -1 : x.from > y.from ? 1 : x.createdAt - y.createdAt;
+  let count = 0;
+  for (const y of new Set(nightsOf(b).map(n => n.slice(0, 4)))) {
+    const nights = [...stammNights(bookings, b.stamm, y, statuses)].sort();
+    nights.forEach((n, i) => {
+      if (i < FREE_NIGHTS) return;
+      const owner = mine.filter(x => x.from <= n && n < x.to).sort(order)[0];
+      if (owner && owner.id === b.id) count++;
+    });
+  }
+  return count;
+}
+
+function expire(bookings, now, today) {
+  let changed = false;
+  for (const b of bookings) {
+    if (b.status !== "pending") continue;
+    const deadline = b.createdAt + EXPIRY_DAYS * DAY;
+    if (now > deadline || b.from < today) { b.status = "expired"; b.decidedAt = Math.min(now, deadline); changed = true; }
+  }
+  return changed;
+}
+
+/* Hochsaison: 1. Juli bis 31. August, erweitert um die Sommerferien in NRW, Hessen, Hamburg.
+   Anfragen von Sub-Usern mit mindestens einer Nacht darin brauchen die Freigabe aller Super-User. */
+function highSeason(y) {
+  let from = y + "-07-01", to = y + "-08-31";
+  for (const st in FERIEN) for (const [a, b, name] of FERIEN[st]) if (name === "Sommerferien" && a.slice(0, 4) === String(y)) { if (a < from) from = a; if (b > to) to = b; }
+  return { from, to };
+}
+const isHighSeason = d => { const h = highSeason(Number(d.slice(0, 4))); return h.from <= d && d <= h.to; };
+function touchesHighSeason(from, to) {
+  for (let y = Number(from.slice(0, 4)); y <= Number(addDays(to, -1).slice(0, 4)); y++) { const h = highSeason(y); if (from <= h.to && to > h.from) return true; }
+  return false;
+}
+const approvedBy = (b, id) => (b.approvals || []).some(a => a.by === id);
+const canApprove = (u, b) => !!u && u.super && b.status === "pending" && !approvedBy(b, u.id) && (b.hs || u.stamm !== b.stamm);
+const canReject = (u, b) => !!u && u.super && b.status === "pending" && !approvedBy(b, u.id);
+const canCancel = (u, b, today) => !!u && isActive(b) && b.to > today && (b.by === u.id || (u.super && u.stamm === b.stamm));
+
+function validateDraft(bookings, user, draft, today) {
+  if (!draft.from || !draft.to) return "Wähle Anreise und Abreise.";
+  if (draft.to <= draft.from) return "Die Abreise muss nach der Anreise liegen.";
+  if (draft.from < today) return "Die Anreise liegt in der Vergangenheit.";
+  if (diffDays(draft.from, draft.to) > MAX_NIGHTS) return `Ein Aufenthalt kann höchstens ${MAX_NIGHTS} Nächte lang sein.`;
+  const c = conflicts(bookings, user.stamm, draft.from, draft.to, draft.id);
+  if (c.length) return { conflict: c[0] };
+  return null;
+}
+
+function createBooking(bookings, user, draft, now, today) {
+  const v = validateDraft(bookings, user, draft, today);
+  if (v) throw new Error(typeof v === "string" ? v : "Überschneidung mit einer anderen Familie.");
+  const b = {
+    id: "b" + now.toString(36) + Math.random().toString(36).slice(2, 6),
+    stamm: user.stamm, by: user.id, with: draft.with || [], guests: draft.guests || 0, note: draft.note || "",
+    from: draft.from, to: draft.to, createdAt: now,
+    status: user.super ? "confirmed" : "pending",
+    decidedBy: null, decidedAt: user.super ? now : null, reason: "",
+    hs: touchesHighSeason(draft.from, draft.to), approvals: []
+  };
+  bookings.push(b);
+  return b;
+}
+
+function decide(bookings, user, id, verdict, reason, now, superIds = STAMME) {
+  const b = bookings.find(x => x.id === id);
+  if (!b) throw new Error("Anfrage nicht gefunden.");
+  if (b.status !== "pending") throw new Error("Über diese Anfrage ist schon entschieden.");
+  if (user && approvedBy(b, user.id)) throw new Error("Du hast schon freigegeben.");
+  if (verdict === "approve") {
+    if (!canApprove(user, b)) throw new Error(b.hs ? "Freigeben können nur Super-User." : "Freigeben kann nur ein Super-User aus einer anderen Familie.");
+    b.approvals = [...(b.approvals || []), { by: user.id, at: now }];
+    if (b.hs && !superIds.every(id => approvedBy(b, id))) return b;   // Hochsaison: es fehlen noch Freigaben
+    b.status = "confirmed";
+  } else {
+    if (!canReject(user, b)) throw new Error("Ablehnen können nur Super-User.");
+    if (!reason || reason.trim().length < 3) throw new Error("Ohne Begründung ist keine Ablehnung möglich.");
+    b.status = "rejected"; b.reason = reason.trim();
+  }
+  b.decidedBy = user.id; b.decidedAt = now;
+  return b;
+}
+
+function cancelBooking(bookings, user, id, now, today) {
+  const b = bookings.find(x => x.id === id);
+  if (!b || !canCancel(user, b, today)) throw new Error("Stornieren nicht möglich.");
+  b.status = "cancelled"; b.decidedBy = user.id; b.decidedAt = now;
+  return b;
+}
+
+/* Feiertage: bundesweit + NRW, HE, HH */
+function easter(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+    g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4,
+    l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+    month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+  return y + "-" + p2(month) + "-" + p2(day);
+}
+function holidays(y) {
+  const e = easter(y);
+  const list = [
+    [y + "-01-01", "Neujahr", null], [addDays(e, -2), "Karfreitag", null], [addDays(e, 1), "Ostermontag", null],
+    [y + "-05-01", "Tag der Arbeit", null], [addDays(e, 39), "Christi Himmelfahrt", null], [addDays(e, 50), "Pfingstmontag", null],
+    [addDays(e, 60), "Fronleichnam", "NRW, Hessen"], [y + "-10-03", "Tag der Deutschen Einheit", null],
+    [y + "-10-31", "Reformationstag", "Hamburg"], [y + "-11-01", "Allerheiligen", "NRW"],
+    [y + "-12-25", "1. Weihnachtstag", null], [y + "-12-26", "2. Weihnachtstag", null]
+  ];
+  const SHORT = { "Christi Himmelfahrt": "Himmelfahrt", "Tag der Deutschen Einheit": "Tag der Dt. Einheit" };
+  return list.map(([date, name, only]) => ({ date, name, only: only && only.replace("Hessen", "HE").replace("Hamburg", "HH"), short: SHORT[name] || name }));
+}
+
+/* Schulferien (KMK / Länder), erster und letzter Ferientag */
+const FERIEN = {
+  NRW: [["2026-01-01","2026-01-06","Weihnachtsferien"],["2026-03-30","2026-04-11","Osterferien"],["2026-05-26","2026-05-26","Pfingstferien"],["2026-07-20","2026-09-01","Sommerferien"],["2026-10-17","2026-10-31","Herbstferien"],["2026-12-23","2027-01-06","Weihnachtsferien"],["2027-03-22","2027-04-03","Osterferien"],["2027-05-18","2027-05-18","Pfingstferien"],["2027-07-19","2027-08-31","Sommerferien"],["2027-10-23","2027-11-06","Herbstferien"],["2027-12-24","2028-01-08","Weihnachtsferien"]],
+  HE: [["2026-01-01","2026-01-10","Weihnachtsferien"],["2026-03-30","2026-04-10","Osterferien"],["2026-06-29","2026-08-07","Sommerferien"],["2026-10-05","2026-10-17","Herbstferien"],["2026-12-23","2027-01-12","Weihnachtsferien"],["2027-03-22","2027-04-02","Osterferien"],["2027-06-28","2027-08-06","Sommerferien"],["2027-10-04","2027-10-16","Herbstferien"],["2027-12-23","2028-01-11","Weihnachtsferien"]],
+  HH: [["2026-01-01","2026-01-02","Weihnachtsferien"],["2026-01-30","2026-01-30","Schulfreier Tag"],["2026-03-02","2026-03-13","Frühjahrsferien"],["2026-05-11","2026-05-15","Pfingstferien"],["2026-07-09","2026-08-19","Sommerferien"],["2026-10-19","2026-10-30","Herbstferien"],["2026-12-21","2027-01-01","Weihnachtsferien"],["2027-01-29","2027-01-29","Schulfreier Tag"],["2027-03-01","2027-03-12","Frühjahrsferien"],["2027-05-07","2027-05-14","Pfingstferien"],["2027-07-01","2027-08-11","Sommerferien"],["2027-10-11","2027-10-22","Herbstferien"],["2027-12-20","2027-12-31","Weihnachtsferien"]]
+};
+const STATE_NAME = { NRW: "NRW", HE: "Hessen", HH: "Hamburg" };
+function ferienOn(state, d) { return FERIEN[state].find(([a, b]) => a <= d && d <= b) || null; }
+/* ===================== LOGIC END ===================== */
+
+if (typeof window === "undefined") return;
+
+/* ---------- Betriebsart ----------
+   Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
+   Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
+   Die Datei ist in beiden Umgebungen identisch. */
+const APP_VERSION = "4.2.1";
+const LIVE = {
+  hosts: ["casalapaz.github.io"],
+  url: "https://nwrkrotxhgtxtshprfur.supabase.co",
+  key: "sb_publishable_IE3KkiK6fO1rvAx-FETQNQ_jG9wzSI3"   // öffentlicher Schlüssel, darf im Code stehen
+};
+const IS_LIVE = window.CASA_FORCE_LIVE === true || (LIVE.hosts.includes(location.hostname) && !/[?&]demo\b/.test(location.search));
+
+/* ---------- People and seed data ---------- */
+let PEOPLE = [
+  { id: "micha", name: "Micha", stamm: "micha", super: true },
+  { id: "leon", name: "Leon", stamm: "micha", super: false },
+  { id: "marilen", name: "Marilen", stamm: "micha", super: false },
+  { id: "olivia", name: "Olivia", stamm: "micha", super: false },
+  { id: "uli", name: "Uli", stamm: "uli", super: true },
+  { id: "kaspar", name: "Kaspar", stamm: "uli", super: false },
+  { id: "karlina", name: "Karlina", stamm: "uli", super: false },
+  { id: "kajus", name: "Kajus", stamm: "uli", super: false },
+  { id: "fanny", name: "Fanny", stamm: "fanny", super: true },
+  { id: "merle", name: "Merle", stamm: "fanny", super: false }
+];
+const STAMM_NAME = { micha: "Micha", uli: "Uli", fanny: "Fanny" };
+const person = id => PEOPLE.find(p => p.id === id);
+const initials = n => n.split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+function seed(now) {
+  const t = iso => D(iso) + 9 * 3600e3;
+  return [
+    { id: "s1", stamm: "uli", by: "kaspar", with: [], guests: 2, from: "2026-06-01", to: "2026-06-17", status: "confirmed", createdAt: t("2026-01-12"), decidedBy: "micha", decidedAt: t("2026-01-13"), reason: "", note: "" },
+    { id: "s2", stamm: "fanny", by: "fanny", with: ["merle"], guests: 0, from: "2026-06-27", to: "2026-07-19", status: "confirmed", createdAt: t("2026-01-20"), decidedBy: null, decidedAt: t("2026-01-20"), reason: "", note: "" },
+    { id: "s3", stamm: "micha", by: "micha", with: ["leon", "marilen", "olivia"], guests: 0, from: "2026-07-19", to: "2026-08-16", status: "confirmed", createdAt: t("2026-01-08"), decidedBy: null, decidedAt: t("2026-01-08"), reason: "", note: "" },
+    { id: "s4", stamm: "uli", by: "uli", with: [], guests: 0, from: "2026-08-17", to: "2026-09-06", status: "confirmed", createdAt: t("2026-01-09"), decidedBy: null, decidedAt: t("2026-01-09"), reason: "", note: "" },
+    { id: "s5", stamm: "uli", by: "karlina", with: [], guests: 1, from: "2026-09-10", to: "2026-09-24", status: "confirmed", createdAt: t("2026-03-02"), decidedBy: "fanny", decidedAt: t("2026-03-03"), reason: "", note: "" },
+    { id: "s6", stamm: "micha", by: "micha", with: [], guests: 0, from: "2027-03-20", to: "2027-03-28", status: "confirmed", createdAt: now - 20 * DAY, decidedBy: null, decidedAt: now - 20 * DAY, reason: "", note: "Ostern" },
+    { id: "s7", stamm: "fanny", by: "fanny", with: ["merle"], guests: 0, from: "2027-06-28", to: "2027-07-12", status: "confirmed", createdAt: now - 12 * DAY, decidedBy: null, decidedAt: now - 12 * DAY, reason: "", note: "" },
+    { id: "s8", stamm: "uli", by: "uli", with: ["kaspar", "karlina"], guests: 0, from: "2027-07-31", to: "2027-08-14", status: "confirmed", createdAt: now - 9 * DAY, decidedBy: null, decidedAt: now - 9 * DAY, reason: "", note: "" },
+    { id: "s9", stamm: "micha", by: "leon", with: [], guests: 2, from: "2027-07-17", to: "2027-07-25", status: "pending", createdAt: now - 3 * DAY, decidedBy: null, decidedAt: null, reason: "", note: "Mit zwei Freunden", approvals: [{ by: "fanny", at: now - 2 * DAY }] },
+    { id: "s10", stamm: "uli", by: "karlina", with: [], guests: 0, from: "2027-09-04", to: "2027-09-12", status: "pending", createdAt: now - 1 * DAY, decidedBy: null, decidedAt: null, reason: "", note: "" },
+    { id: "s11", stamm: "uli", by: "kaspar", with: [], guests: 3, from: "2027-05-01", to: "2027-05-09", status: "rejected", createdAt: now - 8 * DAY, decidedBy: "fanny", decidedAt: now - 6 * DAY, reason: "Vom 3. bis 7. Mai sind die Handwerker für das Dach im Haus.", note: "" }
+  ];
+}
+
+/* ---------- Store (Testdaten im Browser; später Supabase) ---------- */
+const KEY = "casa-la-paz.proto.v1";
+const mem = {};
+const ls = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] ?? null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
+};
+const nowMs = () => Date.now();
+const todayISO = () => { const n = new Date(); return S(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); };
+let db;
+function load() {
+  try { db = JSON.parse(ls.get(KEY)); } catch (e) { db = null; }
+  if (!db || !Array.isArray(db.bookings)) db = { me: "leon", bookings: seed(nowMs()) };
+  for (const b of db.bookings) {   // ältere Testdaten ergänzen
+    if (!Array.isArray(b.approvals)) b.approvals = b.status === "confirmed" && b.decidedBy ? [{ by: b.decidedBy, at: b.decidedAt }] : [];
+    if (typeof b.hs !== "boolean") b.hs = touchesHighSeason(b.from, b.to);
+  }
+  if (expire(db.bookings, nowMs(), todayISO())) save();
+}
+function save() { if (!IS_LIVE) ls.set(KEY, JSON.stringify(db)); }
+
+/* ---------- Supabase (nur Live): Anmeldung und Daten ohne Bibliothek ---------- */
+const SESSION_KEY = "casa-la-paz.session.v1", CACHE_KEY = "casa-la-paz.cache.v1";
+const appUrl = () => location.origin + location.pathname;
+function fail(msg, extra) { return Object.assign(new Error(msg), extra || {}); }
+function niceError(d, status) {
+  const m = (d && (d.message || d.msg || d.error_description || d.error)) || "";
+  const code = d && (d.error_code || d.code);
+  if (/nicht freigeschaltet|saving new user|signups? not allowed|user not found/i.test(m) || code === "signup_disabled") return "Diese E-Mail-Adresse ist für Casa la Paz nicht freigeschaltet. Melde dich bei Leon.";
+  if (code === "otp_expired" || /token has expired|invalid/i.test(m) && /token|otp/i.test(m)) return "Der Code stimmt nicht oder ist abgelaufen.";
+  if (status === 429 || /rate limit|security purposes/i.test(m)) return "Zu viele Versuche. Bitte in einer Minute noch einmal.";
+  if (/email.*(invalid|format)|validate email/i.test(m)) return "Diese E-Mail-Adresse sieht nicht richtig aus.";
+  if (code === "P0001" && m) return m;
+  return "Etwas ist schiefgegangen. Bitte noch einmal versuchen.";
+}
+const sb = {
+  session: null,
+  load() { try { this.session = JSON.parse(ls.get(SESSION_KEY) || "null"); } catch (e) { this.session = null; } return this.session; },
+  store(s) { this.session = s; ls.set(SESSION_KEY, s ? JSON.stringify(s) : ""); },
+  pick(d) { return { access_token: d.access_token, refresh_token: d.refresh_token, expires_at: d.expires_at || Math.floor(Date.now() / 1000) + (d.expires_in || 3600), email: d.user && d.user.email }; },
+  async raw(path, method, body, token) {
+    const h = { apikey: LIVE.key, "Content-Type": "application/json" };
+    if (token) h.Authorization = "Bearer " + token;
+    let res;
+    try { res = await fetch(LIVE.url + path, { method, headers: h, body: body === undefined ? undefined : JSON.stringify(body), cache: "no-store" }); }
+    catch (e) { throw fail("Keine Verbindung. Bitte später noch einmal versuchen.", { offline: true }); }
+    const txt = await res.text(); let data = null; try { data = txt ? JSON.parse(txt) : null; } catch (e) {}
+    return { res, data };
+  },
+  async refresh(force) {
+    const s = this.session; if (!s) return;
+    if (!force && s.expires_at * 1000 - Date.now() > 90e3) return;
+    if (this.pending) return this.pending;
+    this.pending = (async () => {
+      try {
+        const { res, data } = await this.raw("/auth/v1/token?grant_type=refresh_token", "POST", { refresh_token: s.refresh_token });
+        if (res.ok) this.store(this.pick(data));
+        else if (res.status >= 400 && res.status < 500) this.store(null);   // Sitzung ungültig: neu anmelden
+      } catch (e) { /* offline: alte Sitzung behalten */ }
+      finally { this.pending = null; }
+    })();
+    return this.pending;
+  },
+  async call(path, method = "GET", body) {
+    await this.refresh();
+    if (!this.session) throw fail("Bitte melde dich neu an.", { auth: true });
+    let { res, data } = await this.raw(path, method, body, this.session.access_token);
+    if (res.status === 401) {
+      await this.refresh(true);
+      if (!this.session) throw fail("Bitte melde dich neu an.", { auth: true });
+      ({ res, data } = await this.raw(path, method, body, this.session.access_token));
+    }
+    if (!res.ok) throw fail(niceError(data, res.status), { status: res.status, auth: res.status === 401 });
+    return data;
+  },
+  async open(path, body) {   // ohne Anmeldung (Code anfordern / prüfen)
+    const { res, data } = await this.raw(path, "POST", body);
+    if (!res.ok) throw fail(niceError(data, res.status), { status: res.status });
+    return data;
+  }
+};
+const fromRow = r => ({
+  id: r.id, stamm: r.stamm, by: r.booked_by, with: r.companions || [], guests: r.guests || 0, note: r.note || "",
+  from: r.arrive, to: r.depart, status: r.status, createdAt: Date.parse(r.created_at),
+  decidedBy: r.decided_by || null, decidedAt: r.decided_at ? Date.parse(r.decided_at) : null, reason: r.reason || "",
+  hs: !!r.high_season, approvals: (r.approvals || []).map(a => ({ by: a.by, at: Date.parse(a.at) }))
+});
+let lastSync = 0;
+function applyData(d) {
+  PEOPLE = d.people;
+  db = { me: d.me, bookings: d.bookings.map(b => ({ ...b, with: [...b.with] })) };
+  expire(db.bookings, nowMs(), TODAY);   // nur Anzeige; die Datenbank setzt den Verfall selbst
+}
+async function sync() {
+  const [meId, people, rows] = await Promise.all([
+    sb.call("/rest/v1/rpc/whoami", "POST", {}),
+    sb.call("/rest/v1/people?select=id,name,stamm,is_super,sort&order=sort.asc"),
+    sb.call("/rest/v1/bookings?select=*&order=arrive.asc")
+  ]);
+  if (!meId) throw fail("Diese E-Mail-Adresse ist für Casa la Paz nicht freigeschaltet. Melde dich bei Leon.", { member: false });
+  const data = { me: meId, people: people.map(p => ({ id: p.id, name: p.name, stamm: p.stamm, super: p.is_super })), bookings: rows.map(fromRow) };
+  applyData(data); lastSync = Date.now();
+  ls.set(CACHE_KEY, JSON.stringify({ ...data, email: sb.session && sb.session.email, at: lastSync }));
+}
+function readCache() {
+  try { const c = JSON.parse(ls.get(CACHE_KEY) || "null"); return c && c.email === (sb.session && sb.session.email) ? c : null; } catch (e) { return null; }
+}
+const canRender = () => !stack.length && !state.sel && !state.planning;
+function syncQuiet() { if (!IS_LIVE || !sb.session) return; sync().then(() => { if (canRender()) render(); }).catch(e => { if (e.auth || e.member === false) signedOut(e.message); }); }
+
+/* Gleiche Aktionen für Werkbank und Live. Live: die Datenbank prüft alle Regeln noch einmal. */
+const api = {
+  async create(u, draft) {
+    if (!IS_LIVE) { const b = createBooking(db.bookings, u, draft, nowMs(), TODAY); save(); return b; }
+    const v = validateDraft(db.bookings, u, draft, TODAY);
+    if (v) throw fail(typeof v === "string" ? v : "Überschneidung mit einer anderen Familie.");
+    const row = await sb.call("/rest/v1/rpc/create_booking", "POST", { p_arrive: draft.from, p_depart: draft.to, p_companions: draft.with || [], p_guests: draft.guests || 0, p_note: draft.note || "" });
+    await sync().catch(() => {});
+    return db.bookings.find(b => b.id === row.id) || fromRow(row);
+  },
+  async decide(id, verdict, reason) {
+    if (!IS_LIVE) { const b = decide(db.bookings, me(), id, verdict, reason, nowMs(), superIds()); save(); return b; }
+    const row = await sb.call("/rest/v1/rpc/decide_booking", "POST", { p_id: id, p_verdict: verdict, p_reason: reason || "" });
+    await sync().catch(() => {});
+    return fromRow(row);
+  },
+  async cancel(id) {
+    if (!IS_LIVE) { const b = cancelBooking(db.bookings, me(), id, nowMs(), TODAY); save(); return b; }
+    const row = await sb.call("/rest/v1/rpc/cancel_booking", "POST", { p_id: id });
+    await sync().catch(() => {});
+    return fromRow(row);
+  }
+};
+/* Nach einem Fehler im Live-Betrieb den Stand neu holen (z. B. hat jemand anderes schon entschieden). */
+function afterError(e) { toast(e.message); if (IS_LIVE && !e.offline) syncQuiet(); }
+function busy(btn, on, text) {
+  if (!btn) return;
+  if (on) { btn.dataset.label = btn.textContent; btn.classList.add("busy"); if (text) btn.textContent = text; }
+  else { btn.classList.remove("busy"); if (btn.dataset.label) btn.textContent = btn.dataset.label; }
+}
+
+/* ---------- State ---------- */
+const TODAY = todayISO();
+const thisYear = Number(TODAY.slice(0, 4));
+const MONTH_LIST = (() => { const out = []; for (let y = 2026; y <= 2027; y++) for (let m = 1; m <= 12; m++) out.push(`${y}-${p2(m)}`); return out; })();
+const TODAY_IDX = Math.max(0, MONTH_LIST.indexOf(TODAY.slice(0, 7)));
+const state = {
+  tab: "home",
+  year: Number(TODAY.slice(5, 7)) >= 10 ? thisYear + 1 : thisYear,
+  calIdx: TODAY_IDX,
+  sel: null,          // { from, to } while choosing
+  planning: false,    // started from the home button
+  growId: null
+};
+const me = () => person(db.me);
+
+/* ---------- Formatting ---------- */
+const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const MON_S = ["Jan.","Feb.","März","Apr.","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."];
+const WD = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+const parts = s => s.split("-").map(Number);
+function fmtRange(a, b) {
+  const [ya, ma, da] = parts(a), [yb, mb, db_] = parts(b);
+  if (ya === yb && ma === mb) return `${da}.–${db_}. ${MONTHS[ma - 1]} ${ya}`;
+  if (ya === yb) return `${da}. ${MON_S[ma - 1]} – ${db_}. ${MON_S[mb - 1]} ${ya}`;
+  return `${da}. ${MON_S[ma - 1]} ${ya} – ${db_}. ${MON_S[mb - 1]} ${yb}`;
+}
+function fmtDay(s, withWd = true, withYear = true) { const [y, m, d] = parts(s); return (withWd ? WD[weekday(s)] + ", " : "") + `${d}. ${MONTHS[m - 1]}${withYear && y !== thisYear ? " " + y : ""}`; }
+const shortDay = s => { const [, m, d] = parts(s); return `${WD[weekday(s)]} ${d}. ${MON_S[m - 1]}`; };
+const dm = s => { const [, m, d] = parts(s); return `${d}.${m}.`; };
+function fmtWhen(ms) {
+  const d = Math.floor((nowMs() - ms) / DAY);
+  if (d <= 0) return "heute"; if (d === 1) return "gestern"; if (d < 30) return `vor ${d} Tagen`;
+  const x = new Date(ms); return `am ${x.getDate()}. ${MON_S[x.getMonth()]} ${x.getFullYear()}`;
+}
+const EUR = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" });
+const eur = v => EUR.format(Math.round(v * 100) / 100);
+const nights = n => n === 1 ? "1 Nacht" : `${n} Nächte`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const otherSupers = stamm => PEOPLE.filter(p => p.super && p.stamm !== stamm).map(p => p.name);
+const superPeople = () => PEOPLE.filter(p => p.super);
+const superIds = () => superPeople().map(p => p.id);
+const andList = a => a.length > 1 ? a.slice(0, -1).join(", ") + " und " + a[a.length - 1] : (a[0] || "");
+/* Wer gibt frei? Hochsaison: alle Super-User, sonst einer aus einer anderen Familie. */
+const approverPhrase = (stamm, hs) => hs ? `${andList(superPeople().map(p => p.name))} geben frei` : `${otherSupers(stamm).join(" oder ")} gibt frei`;
+const awaiting = b => b.hs ? superPeople().filter(p => !approvedBy(b, p.id)).map(p => p.name) : otherSupers(b.stamm);
+const awaitingText = b => b.hs ? andList(awaiting(b)) : awaiting(b).join(" oder ");
+const sunIcon = (sz = 13) => `<svg width="${sz}" height="${sz}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1"/></svg>`;
+const fmtHs = y => { const h = highSeason(y); return `${dm(h.from)}–${dm(h.to)}`; };
+const daysLeft = b => { const l = Math.max(0, EXPIRY_DAYS - Math.floor((nowMs() - b.createdAt) / DAY)); return l === 1 ? "1 Tag" : l + " Tagen"; };
+const chev = d => `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${d < 0 ? "M11 3.5 5.5 9l5.5 5.5" : "M7 3.5 12.5 9 7 14.5"}"/></svg>`;
+const xIcon = `<svg width="13" height="13" viewBox="0 0 14 14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>`;
+const arrowIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 10.5 8 6 12.5"/></svg>`;
+function statusChip(b) {
+  return {
+    confirmed: '<span class="chip chip-ok"><span class="dot"></span>Bestätigt</span>',
+    pending: '<span class="chip chip-wait"><span class="dot"></span>Wartet auf Freigabe</span>',
+    rejected: '<span class="chip chip-no"><span class="dot"></span>Abgelehnt</span>',
+    expired: '<span class="chip chip-off">Verfallen</span>',
+    cancelled: '<span class="chip chip-off">Storniert</span>'
+  }[b.status];
+}
+function partyLine(b) {
+  const u = me();
+  const names = [b.by, ...b.with].map(id => id === u.id ? "du" : person(id).name).sort((a, c) => (a === "du" ? -1 : c === "du" ? 1 : 0));
+  if (names[0] === "du") names[0] = "Du";
+  if (b.guests) names.push(`${b.guests} ${b.guests === 1 ? "Gast" : "Gäste"}`);
+  return names.length > 1 ? names.slice(0, -1).join(", ") + " und " + names[names.length - 1] : names[0];
+}
+function nightOwner(d) {
+  return db.bookings.filter(b => isActive(b) && b.from <= d && d < b.to).sort((a, b) => (a.status === "confirmed" ? 0 : 1) - (b.status === "confirmed" ? 0 : 1))[0] || null;
+}
+
+/* ---------- Feedback ---------- */
+const hapticEl = (() => { const l = document.createElement("label"); l.style.display = "none"; l.setAttribute("aria-hidden", "true"); const i = document.createElement("input"); i.type = "checkbox"; i.setAttribute("switch", ""); l.append(i); document.body.append(l); return l; })();
+function haptic() {
+  const a = document.activeElement;
+  if (a && (a.tagName === "TEXTAREA" || a.tagName === "INPUT")) return;
+  try { if (navigator.vibrate) navigator.vibrate(8); else hapticEl.click(); } catch (e) {}
+}
+let toastT;
+function toast(msg) {
+  const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2800);
+}
+
+/* ---------- Tabs ---------- */
+function setTab(tab, opts = {}) {
+  const changed = tab !== state.tab;
+  state.tab = tab;
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab === tab)));
+  ["home", "cal", "req"].forEach(v => { const el = document.getElementById("v-" + v); el.hidden = v !== tab; if (v === tab && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
+  if (tab !== "cal") clearSel();
+  render(opts);
+  try { history.replaceState(null, "", "#" + ({ home: "uebersicht", cal: "kalender", req: "anfragen" })[tab]); } catch (e) {}
+}
+function render(opts = {}) {
+  renderBadge();
+  if (state.tab === "home") renderHome();
+  if (state.tab === "cal") renderCal(opts);
+  if (state.tab === "req") renderReq();
+}
+function renderBadge() {
+  const n = db.bookings.filter(b => canApprove(me(), b)).length;
+  const el = document.getElementById("badge"); el.hidden = !n; el.textContent = n;
+}
+function topBar() {
+  const u = me();
+  return `<div class="top"><div class="wordmark">Casa la Paz<small>Vinaròs</small></div>
+    <button class="avatar s-${u.stamm}" data-act="who" aria-label="Angemeldet als ${esc(u.name)}. Ansicht wechseln">${initials(u.name)}</button></div>`;
+}
+
+/* ---------- Home ---------- */
+function nextStayFor(u) {
+  return db.bookings.filter(b => isActive(b) && b.to > TODAY && (b.by === u.id || b.with.includes(u.id))).sort((a, b) => a.from < b.from ? -1 : 1)[0] || null;
+}
+function heroChip(b) {
+  return b.status === "pending" ? '<span class="chip chip-wait"><span class="dot"></span>Freigabe offen</span>' : '<span class="chip chip-ok"><span class="dot"></span>Bestätigt</span>';
+}
+function houseLine() {
+  const now = db.bookings.find(b => isActive(b) && b.from <= TODAY && TODAY < b.to);
+  if (now) return `Gerade im Haus: ${esc(person(now.by).name)}, bis ${fmtDay(now.to, false, false)}`;
+  const nxt = db.bookings.filter(b => isActive(b) && b.from > TODAY).sort((a, b) => a.from < b.from ? -1 : 1)[0];
+  if (nxt) return `Haus frei bis ${fmtDay(nxt.from, false, false)}, dann ${esc(person(nxt.by).name)}`;
+  return "Das Haus ist frei";
+}
+function renderHome() {
+  const u = me(), v = document.getElementById("v-home");
+  const next = nextStayFor(u);
+  let hero;
+  if (next) {
+    const until = diffDays(TODAY, next.from);
+    const when = next.from <= TODAY ? "Du bist gerade dort" : until === 1 ? "Morgen geht es los" : `In ${until} Tagen`;
+    hero = `<button class="panel hero s-${next.stamm}" data-open="${next.id}">
+      <div class="hero-k"><span>Dein nächster Aufenthalt</span>${heroChip(next)}</div>
+      <div class="hero-date">${fmtRange(next.from, next.to)}</div>
+      <div class="hero-meta">${when}, ${nights(diffDays(next.from, next.to))}</div></button>`;
+  } else {
+    hero = `<div class="panel hero"><div class="hero-k"><span>Dein nächster Aufenthalt</span></div>
+      <div class="hero-date" style="color:var(--ink-3)">Noch nichts geplant</div>
+      <div class="hero-meta">Tippe unten auf „Aufenthalt planen“</div></div>`;
+  }
+  // Requests tile
+  const forMe = db.bookings.filter(b => canApprove(u, b));
+  const minePend = db.bookings.filter(b => b.status === "pending" && b.by === u.id);
+  const reqNum = u.super ? forMe.length : minePend.length;
+  const reqText = u.super ? (forMe.length ? (forMe.length === 1 ? "wartet auf deine Freigabe" : "warten auf deine Freigabe") : "Nichts zu entscheiden")
+    : (minePend.length ? (minePend.length === 1 ? "Anfrage wartet auf Freigabe" : "Anfragen warten auf Freigabe") : "Keine offenen Anfragen");
+  // Quota tile (own Stamm)
+  const q = quota(db.bookings, u.stamm, state.year);
+  const r = 27, C = 2 * Math.PI * r;
+  const used = Math.min(q.nights, FREE_NIGHTS) / FREE_NIGHTS, proj = Math.min(q.projected, FREE_NIGHTS) / FREE_NIGHTS;
+  const ring = `<svg class="ring" viewBox="0 0 66 66" aria-hidden="true"><g transform="rotate(-90 33 33)" fill="none" stroke-width="7" stroke-linecap="round">
+      <circle class="bg" cx="33" cy="33" r="${r}"/>
+      ${proj > used ? `<circle class="pd" cx="33" cy="33" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - proj)}"/>` : ""}
+      <circle class="fg" cx="33" cy="33" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - used)}"/></g>
+      <text x="33" y="36" text-anchor="middle">${Math.max(0, FREE_NIGHTS - q.nights)}</text><text class="rl" x="33" y="48" text-anchor="middle">frei</text></svg>`;
+  const quotaSub = q.paid ? `<b>${nights(q.paid)}</b> darüber<br>${eur(q.cost)}` : q.pending ? `+${q.pending} angefragt` : `von ${FREE_NIGHTS}`;
+  // Calendar tile: this month
+  const [cy, cm] = parts(TODAY);
+  const first = `${cy}-${p2(cm)}-01`, dim = new Date(Date.UTC(cy, cm, 0)).getUTCDate();
+  let mm = ""; for (let i = 0; i < weekday(first); i++) mm += `<i class="x"></i>`;
+  for (let d = 1; d <= dim; d++) { const iso = `${cy}-${p2(cm)}-${p2(d)}`, o = nightOwner(iso); mm += `<i class="${o ? `b s-${o.stamm} ${o.status === "pending" ? "p" : ""}` : ""} ${iso === TODAY ? "t" : ""}"></i>`; }
+  // Year tile
+  let my = "";
+  for (let m = 0; m < 12; m++) {
+    const dimm = new Date(Date.UTC(state.year, m + 1, 0)).getUTCDate(); let row = "";
+    for (let d = 1; d <= 31; d++) { if (d > dimm) { row += `<i class="x"></i>`; continue; } const o = nightOwner(`${state.year}-${p2(m + 1)}-${p2(d)}`); row += `<i class="${o ? `b s-${o.stamm} ${o.status === "pending" ? "p" : ""}` : ""}"></i>`; }
+    my += `<span>${row}</span>`;
+  }
+  v.innerHTML = `<div class="home">
+    <div class="hello"><div><h1>Hola${u.placeholder ? "" : ", " + esc(u.name)}.</h1><p class="status">${houseLine()}</p></div>
+      <button class="avatar s-${u.stamm}" data-act="who" aria-label="Angemeldet als ${esc(u.name)}. Ansicht wechseln">${initials(u.name)}</button></div>
+    ${hero}
+    <div class="tiles">
+      <button class="panel tile" data-tab-go="cal"><div><div class="tile-t">Kalender ${arrowIcon}</div><div class="tile-s sub">${MONTHS[cm - 1]} ${cy}</div></div><div class="mini-month" style="--r:${Math.ceil((weekday(first) + dim) / 7)}" aria-hidden="true">${mm}</div></button>
+      <button class="panel tile" data-tab-go="req"><div><div class="tile-t">Anfragen ${arrowIcon}</div></div>
+        <div><div class="tile-big num" style="${reqNum ? "" : "color:var(--ink-3)"}">${reqNum}</div><div class="tile-s">${reqText}</div></div>${u.super && reqNum ? `<span class="tile-badge">${reqNum}</span>` : ""}</button>
+      <button class="panel tile s-${u.stamm}" data-act="quota"><div><div class="tile-t">Freinächte ${arrowIcon}</div><div class="tile-s sub">${STAMM_NAME[u.stamm]}s Familie, ${state.year}</div></div>
+        <div class="ring-wrap">${ring}<div class="tile-s" style="margin:0">${quotaSub}</div></div></button>
+      <button class="panel tile" data-act="year"><div><div class="tile-t">Das Jahr ${arrowIcon}</div><div class="tile-s sub">Belegung ${state.year}</div></div><div class="mini-year" aria-hidden="true">${my}</div></button>
+    </div>
+    <button class="btn btn-ink btn-wide cta" data-act="plan">Aufenthalt planen</button>
+  </div>`;
+}
+
+/* ---------- Year + quota sheets ---------- */
+function yearGridHTML(y) {
+  let rows = "";
+  for (let m = 0; m < 12; m++) {
+    let cells = ""; const dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    for (let d = 1; d <= 31; d++) {
+      if (d > dim) { cells += `<i class="yc none"></i>`; continue; }
+      const iso = `${y}-${p2(m + 1)}-${p2(d)}`, o = nightOwner(iso), cls = ["yc"];
+      if (iso < TODAY) cls.push("past"); if (iso === TODAY) cls.push("today");
+      if (o) cls.push("b", "s-" + o.stamm, o.status === "pending" ? "pend" : "");
+      if (isHighSeason(iso)) cls.push("hs");
+      cells += `<i class="${cls.join(" ")}" style="--m:${m};--d:${d}"></i>`;
+    }
+    rows += `<span class="ym">${MON_S[m].replace(".", "")}</span><button class="yrow" data-month="${y}-${p2(m + 1)}" aria-label="${MONTHS[m]} ${y} öffnen">${cells}</button>`;
+  }
+  return `<div class="ygrid">${rows}</div>`;
+}
+function openYear() {
+  let y = state.year;
+  openSheet(`<div class="sheet-title"><h2>Das Jahr</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+    <div class="year-switch" style="margin-top:10px"><button class="icon-btn" data-ys="-1" aria-label="Vorjahr">${chev(-1)}</button><span class="y num"></span><button class="icon-btn" data-ys="1" aria-label="Folgejahr">${chev(1)}</button></div>
+    <p class="muted" style="margin:6px 0 0;font-size:15px">Jede Zeile ist ein Monat, jedes Feld eine Nacht. Tippe auf einen Monat, um ihn im Kalender zu öffnen.</p>
+    <div data-grid></div>
+    <div class="legend"><span class="s-micha"><i></i>Micha</span><span class="s-uli"><i></i>Uli</span><span class="s-fanny"><i></i>Fanny</span><span><i class="pend"></i>Angefragt</span><span><i class="hsl"></i>Hochsaison</span></div>`,
+  { label: "Das Jahr", onMount: (body, layer) => {
+    const paint = (anim) => {
+      body.querySelector(".y").textContent = y;
+      body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2027;
+      body.querySelector("[data-grid]").innerHTML = yearGridHTML(y);
+      const g = body.querySelector(".ygrid");
+      if (anim && !matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(() => requestAnimationFrame(() => g.classList.add("in"))); else g.classList.add("in");
+    };
+    body.addEventListener("click", e => {
+      const ys = e.target.closest("[data-ys]"); if (ys) { y += Number(ys.dataset.ys); haptic(); paint(false); }
+      const row = e.target.closest("[data-month]"); if (row) { haptic(); closeSheet(layer); goMonth(row.dataset.month); }
+    });
+    paint(true);
+  } });
+}
+function quotaRow(s, y) {
+  const q = quota(db.bookings, s, y);
+  let ticks = ""; for (let i = 0; i < FREE_NIGHTS; i++) ticks += `<i class="tick ${i < q.free ? "on" : i < q.projected ? "pend" : ""}"></i>`;
+  const left = FREE_NIGHTS - q.free;
+  const foot = q.paid ? `<span class="q-over"><b>${nights(q.paid)}</b> darüber</span><span><b class="num">${eur(q.cost)}</b></span>`
+    : `<span>${left ? `noch <b>${nights(left)}</b> frei` : "Freinächte aufgebraucht"}</span><span class="num">${eur(0)}</span>`;
+  const pend = q.pending ? `<span class="faint" style="font-size:13px;font-weight:500"> + ${q.pending} angefragt</span>` : "";
+  return `<div class="q s-${s}"><span class="q-name">${STAMM_NAME[s]}${pend}</span><span class="q-num num">${q.nights}<small> Nächte</small></span><div class="ticks" aria-hidden="true">${ticks}</div><div class="q-foot">${foot}</div></div>`;
+}
+function openQuota() {
+  let y = state.year;
+  openSheet(`<div class="sheet-title"><h2>Freinächte</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+    <div class="year-switch" style="margin-top:10px"><button class="icon-btn" data-ys="-1" aria-label="Vorjahr">${chev(-1)}</button><span class="y num"></span><button class="icon-btn" data-ys="1" aria-label="Folgejahr">${chev(1)}</button></div>
+    <div data-rows></div>
+    <p class="faint" style="font-size:14px;margin:6px 0 0;line-height:1.4">21 Freinächte pro Familie und Kalenderjahr. Gezählt werden Nächte, in denen die Familie im Haus ist, auch wenn mehrere aus der Familie gleichzeitig da sind. Jede weitere Nacht kostet ${eur(RATE)} (200 € pro Woche). Die Freinächte verbraucht, wer zuerst im Jahr da ist.</p>`,
+  { label: "Freinächte", onMount: (body) => {
+    const paint = () => {
+      body.querySelector(".y").textContent = y;
+      body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2027;
+      body.querySelector("[data-rows]").innerHTML = STAMME.map(s => quotaRow(s, y)).join("");
+    };
+    body.addEventListener("click", e => { const ys = e.target.closest("[data-ys]"); if (ys) { y += Number(ys.dataset.ys); haptic(); paint(); } });
+    paint();
+  } });
+}
+
+/* ---------- Calendar ---------- */
+const pagerEl = () => document.getElementById("pager");
+function renderCal(opts = {}) {
+  const v = document.getElementById("v-cal"), u = me();
+  v.style.setProperty("--me", `var(--${u.stamm})`);
+  if (opts.month) state.calIdx = Math.max(0, MONTH_LIST.indexOf(opts.month));
+  v.innerHTML = `<div class="cal-head"><div style="min-width:0"><div class="cal-title" id="cal-title"></div><div class="cal-sub" id="cal-sub">Tippe auf einen freien Tag</div></div>
+      <button class="today-btn" data-act="today" aria-label="Zum aktuellen Monat"><span class="ar" aria-hidden="true"></span>Heute</button></div>
+    <div class="wd">${WD.map(w => `<span>${w}</span>`).join("")}</div>
+    <div class="pager" id="pager">${MONTH_LIST.map(monthPage).join("")}</div>`;
+  const pg = pagerEl();
+  pg.scrollLeft = state.calIdx * pg.clientWidth;
+  requestAnimationFrame(() => { pg.scrollLeft = state.calIdx * pg.clientWidth; });
+  pg.addEventListener("scroll", onPagerScroll, { passive: true });
+  if ("onscrollend" in window) pg.addEventListener("scrollend", onPagerSettle);
+  updateCalHead();
+  paintSel();
+  if (state.growId) { const id = state.growId; state.growId = null; v.querySelectorAll(`.bar[data-open="${id}"]`).forEach((b, i) => { b.style.animationDelay = (150 + i * 120) + "ms"; b.classList.add("grow"); }); }
+}
+function monthPage(ym, idx) {
+  const [y, m] = ym.split("-").map(Number);
+  const first = `${ym}-01`, dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const cells = []; for (let i = 0; i < weekday(first); i++) cells.push(null);
+  for (let d = 1; d <= dim; d++) cells.push(`${ym}-${p2(d)}`);
+  while (cells.length % 7) cells.push(null);
+  const hol = new Map(holidays(y).map(h => [h.date, h]));
+  let weeks = ""; for (let w = 0; w < cells.length; w += 7) weeks += weekRow(cells.slice(w, w + 7), hol);
+  return `<section class="mpage" data-ym="${ym}" aria-label="${MONTHS[m - 1]} ${y}">
+    <div class="mgrid" style="--rows:${cells.length / 7}">${weeks}</div>
+    <div class="mfoot"><button class="icon-btn" data-nav="-1" aria-label="Vorheriger Monat" ${idx === 0 ? "disabled" : ""}>${chev(-1)}</button>
+      <div class="fnote">${ferienNote(ym)}</div>
+      <button class="icon-btn" data-nav="1" aria-label="Nächster Monat" ${idx === MONTH_LIST.length - 1 ? "disabled" : ""}>${chev(1)}</button></div></section>`;
+}
+function ferienNote(ym) {
+  const a = `${ym}-01`, [y, m] = parts(a), b = `${ym}-${p2(new Date(Date.UTC(y, m, 0)).getUTCDate())}`;
+  const out = [];
+  for (const st of ["NRW", "HE", "HH"]) for (const f of FERIEN[st]) if (f[0] <= b && f[1] >= a) {
+    const range = f[0] === f[1] ? dm(f[0]) : `${dm(f[0])}–${dm(f[1])}`;
+    out.push(`<span>${STATE_NAME[st]} ${range}</span>`);
+  }
+  return out.length ? `<span><i></i><b>Schulferien</b></span>${out.join("")}` : `<span class="faint">Keine Schulferien in NRW, Hessen, Hamburg</span>`;
+}
+function weekRow(cells, hol) {
+  const real = cells.map((d, i) => d ? i : -1).filter(i => i >= 0);
+  const c0 = real[0], c1 = real[real.length - 1], d0 = cells[c0], d1 = cells[c1];
+  const days = cells.map((d, i) => {
+    if (!d) return `<span class="c blank"></span>`;
+    const cls = ["c"]; if (i >= 5) cls.push("we"); if (d < TODAY) cls.push("past"); if (d === TODAY) cls.push("today");
+    const h = hol.get(d); if (h) cls.push("hol");
+    const hsd = isHighSeason(d);
+    if (hsd) cls.push("hs");
+    const label = fmtDay(d) + (h ? `, ${h.name}${h.only ? " (" + h.only + ")" : ""}` : "") + (hsd ? ", Hochsaison" : "");
+    return `<button class="${cls.join(" ")}" data-day="${d}" aria-label="${esc(label)}"><span class="n">${Number(d.slice(8))}</span></button>`;
+  }).join("");
+  // Holidays (consecutive days merged)
+  let hols = "";
+  const hs = cells.map((d, i) => d && hol.get(d) ? { i, h: hol.get(d) } : null).filter(Boolean);
+  for (let k = 0; k < hs.length; k++) {
+    const a = hs[k]; let b = a;
+    while (k + 1 < hs.length && hs[k + 1].i === b.i + 1) b = hs[++k];
+    const name = a !== b ? (a.h.name.includes("Weihnachtstag") ? "Weihnachten" : a.h.short + " / " + b.h.short) : a.h.short + (a.h.only ? " (" + a.h.only + ")" : "");
+    const right = a.i >= 4;
+    hols += `<span class="hl ${right ? "r" : ""}" style="left:calc(${(right ? b.i + 1 : a.i) / 7 * 100}% ${right ? "- 3px" : "+ 3px"})">${esc(name)}</span>`;
+  }
+  // Booking bars: from the middle of the arrival day to the middle of the departure day
+  const segs = [];
+  for (const b of db.bookings) {
+    if (!isActive(b) || b.to < d0 || b.from > d1) continue;
+    const start = b.from >= d0 ? c0 + diffDays(d0, b.from) + .5 : c0;
+    const end = b.to <= d1 ? c0 + diffDays(d0, b.to) + .5 : c1 + 1;
+    if (end - start <= 0) continue;
+    segs.push({ b, start, end, ra: b.from >= d0, rb: b.to <= d1 });
+  }
+  segs.sort((x, y) => x.start - y.start);
+  const laneEnd = [];
+  for (const s of segs) { let l = laneEnd.findIndex(e => e <= s.start + 1e-6); if (l < 0) { l = laneEnd.length; laneEnd.push(0); } laneEnd[l] = s.end; s.lane = l; }
+  const bars = segs.map(s => {
+    const w = s.end - s.start, name = person(s.b.by).name;
+    return `<button class="bar s-${s.b.stamm} ${s.b.status === "pending" ? "pend" : ""} ${s.ra ? "ra" : ""} ${s.rb ? "rb" : ""}" data-open="${s.b.id}"
+      style="left:${s.start / 7 * 100}%;width:calc(${w / 7 * 100}% - ${s.rb ? 2 : 0}px);top:${s.lane * 29}px" aria-label="${esc(name)}, ${fmtRange(s.b.from, s.b.to)}">${w >= 1.4 ? esc(name) : ""}</button>`;
+  }).join("");
+  // Hochsaison: feine Linie an der Oberkante (Enden gerundet am Saisonanfang/-ende)
+  let hsl = "", hrun = null;
+  const hflush = endCol => {
+    if (hrun == null) return;
+    const a = !isHighSeason(addDays(cells[hrun], -1)), b = !isHighSeason(addDays(cells[endCol - 1], 1));
+    hsl += `<span class="hsl-line ${a ? "a" : ""} ${b ? "b" : ""}" style="left:calc(${hrun / 7 * 100}% + ${a ? 4 : 0}px);width:calc(${(endCol - hrun) / 7 * 100}% - ${(a ? 4 : 0) + (b ? 4 : 0)}px)"></span>`;
+    hrun = null;
+  };
+  cells.forEach((d, i) => { const h = d && isHighSeason(d); if (h && hrun == null) hrun = i; if (!h && hrun != null) hflush(i); });
+  hflush(c1 + 1);
+  // Schulferien: eine neutrale Linie (mind. ein Land frei), nicht in der Hochsaison – dort sind die Sommerferien ohnehin enthalten
+  let fer = "", run = null;
+  const flush = endCol => { if (run == null) return; fer += `<span class="fseg" style="left:calc(${run / 7 * 100}% + 10px);width:calc(${(endCol - run) / 7 * 100}% - 20px)"></span>`; run = null; };
+  cells.forEach((d, i) => { const f = d && !isHighSeason(d) && ["NRW", "HE", "HH"].some(st => ferienOn(st, d)); if (f && run == null) run = i; if (!f && run != null) flush(i); });
+  flush(c1 + 1);
+  if (fer) fer = `<div class="fl">${fer}</div>`;
+  return `<div class="wk">${hsl}<div class="cells">${days}</div>${hols ? `<div class="hols">${hols}</div>` : ""}
+    <div class="bars ${hols ? "has-h" : ""}">${bars}</div><div class="fer">${fer}</div></div>`;
+}
+function updateCalHead() {
+  const t = document.getElementById("cal-title"); if (!t) return;
+  const [y, m] = MONTH_LIST[state.calIdx].split("-").map(Number);
+  t.innerHTML = `${MONTHS[m - 1]} <span class="y">${y}</span>`;
+  const sub = document.getElementById("cal-sub");
+  if (sub) {
+    const ym = MONTH_LIST[state.calIdx], hs = highSeason(y), mEnd = `${ym}-${p2(new Date(Date.UTC(y, m, 0)).getUTCDate())}`;
+    sub.innerHTML = hs.from <= mEnd && hs.to >= `${ym}-01` ? `<span class="hs-chip">${sunIcon()}Hochsaison</span>${dm(hs.from)}–${dm(hs.to)}` : "Tippe auf einen freien Tag";
+  }
+  const tb0 = document.querySelector(".today-btn");
+  if (tb0) {
+    const back = state.calIdx > TODAY_IDX; // today lies to the left
+    tb0.classList.toggle("r", !back);
+    tb0.querySelector(".ar").innerHTML = state.calIdx === TODAY_IDX ? "" : `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${back ? "M14 9H4M8.5 4.5 4 9l4.5 4.5" : "M4 9h10M9.5 4.5 14 9l-4.5 4.5"}"/></svg>`;
+    tb0.setAttribute("aria-disabled", String(state.calIdx === TODAY_IDX));
+  }
+  const tb = document.querySelector(".today-btn"); if (tb) tb.classList.toggle("here", state.calIdx === TODAY_IDX);
+}
+let settleT;
+function onPagerScroll() {
+  const pg = pagerEl(); if (!pg) return;
+  const idx = Math.round(pg.scrollLeft / pg.clientWidth);
+  if (idx !== state.calIdx && idx >= 0 && idx < MONTH_LIST.length) { state.calIdx = idx; updateCalHead(); }
+  if (!("onscrollend" in window)) { clearTimeout(settleT); settleT = setTimeout(onPagerSettle, 120); }
+}
+let lastSettled = null;
+function onPagerSettle() { if (lastSettled !== null && lastSettled !== state.calIdx) haptic(); lastSettled = state.calIdx; }
+function goIdx(idx, smooth = true) {
+  const pg = pagerEl(); if (!pg) return;
+  idx = Math.max(0, Math.min(MONTH_LIST.length - 1, idx));
+  const far = Math.abs(idx - state.calIdx) > 1;
+  if (far || !smooth) { pg.classList.remove("jump"); void pg.offsetWidth; pg.classList.add("jump"); pg.scrollTo({ left: idx * pg.clientWidth, behavior: "auto" }); }
+  else pg.scrollTo({ left: idx * pg.clientWidth, behavior: "smooth" });
+  state.calIdx = idx; updateCalHead();
+}
+function goMonth(ym) { if (state.tab !== "cal") setTab("cal", { month: ym }); else goIdx(MONTH_LIST.indexOf(ym)); }
+addEventListener("resize", () => { const pg = pagerEl(); if (pg && state.tab === "cal") pg.scrollLeft = state.calIdx * pg.clientWidth; });
+
+/* ---------- Choosing dates ---------- */
+const selbar = document.getElementById("selbar");
+function bar(main, sub, btn) {
+  if (!main) { selbar.classList.remove("on"); return; }
+  selbar.querySelector("p").innerHTML = `${main}${sub ? `<small>${sub}</small>` : ""}`;
+  selbar.querySelector("button").textContent = btn || "Abbrechen";
+  selbar.classList.add("on");
+}
+function clearSel() { state.sel = null; state.planning = false; bar(null); paintSel(); }
+/* Latest possible departure for an arrival: the next arrival of another Stamm (turnover day allowed). */
+function maxDeparture(from) {
+  const u = me(), cap = addDays(from, MAX_NIGHTS);
+  const next = db.bookings.filter(b => isActive(b) && b.stamm !== u.stamm && b.from >= from).sort((a, b) => a.from < b.from ? -1 : 1)[0];
+  return next && next.from <= cap ? { date: next.from, b: next } : { date: cap, b: null };
+}
+function paintSel() {
+  const cells = document.querySelectorAll("#v-cal .c[data-day]");
+  const s = state.sel, limit = s && !s.to ? maxDeparture(s.from) : null;
+  cells.forEach(c => {
+    const d = c.dataset.day;
+    c.classList.toggle("sel-a", !!s && d === s.from);
+    c.classList.toggle("solo", !!s && !s.to && d === s.from);
+    c.classList.toggle("sel-b", !!s && !!s.to && d === s.to);
+    c.classList.toggle("in", !!s && !!s.to && d > s.from && d < s.to);
+    c.classList.toggle("nogo", !!s && !s.to && (d < TODAY || (limit && d > limit.date)));
+  });
+}
+function blockingAt(d) { const u = me(); return db.bookings.find(b => isActive(b) && b.stamm !== u.stamm && b.from <= d && d < b.to) || null; }
+function pulse(d) { const c = document.querySelector(`#v-cal .c[data-day="${d}"]`); if (c) { c.classList.remove("pick"); void c.offsetWidth; c.classList.add("pick"); } }
+function onDay(d) {
+  const s = state.sel;
+  if (d < TODAY) { toast("Dieser Tag liegt in der Vergangenheit."); return; }
+  // Step 1: arrival
+  if (!s || d <= s.from) {
+    const blk = blockingAt(d);
+    if (blk) { if (s) { toast(`An diesem Tag ist ${person(blk.by).name} im Haus.`); return; } openBooking(blk.id); return; }
+    haptic();
+    state.sel = { from: d };
+    paintSel(); pulse(d);
+    const lim = maxDeparture(d);
+    const hsHint = !me().super && isHighSeason(d) ? `Hochsaison: ${approverPhrase(me().stamm, true)}. ` : "";
+    bar(`Anreise ${fmtDay(d, true, false)}`, hsHint + (lim ? `Jetzt den Abreisetag antippen, spätestens ${fmtDay(lim.date, false, false)}.` : "Jetzt den Abreisetag antippen. Für spätere Monate wischen."), "Zurück");
+    return;
+  }
+  // Step 2: departure
+  const lim = maxDeparture(s.from);
+  if (lim && d > lim.date) { haptic(); toast(lim.b ? `Ab ${fmtDay(lim.date, false)} ist ${person(lim.b.by).name} im Haus. Bis dahin ist frei.` : `Höchstens ${MAX_NIGHTS} Nächte am Stück. Späteste Abreise: ${fmtDay(lim.date, false)}.`); return; }
+  haptic();
+  state.sel = { from: s.from, to: d };
+  paintSel(); pulse(d);
+  bar(null);
+  setTimeout(() => openPlan({ from: s.from, to: d }), 260);
+}
+
+/* ---------- Requests ---------- */
+function reqRow(b) {
+  const u = me(), p = person(b.by), n = diffDays(b.from, b.to);
+  let meta = `${nights(n)}, ${STAMM_NAME[b.stamm]}s Familie. Angefragt ${fmtWhen(b.createdAt)}.`;
+  if (b.status === "pending") meta += ` Verfällt in ${daysLeft(b)}.`;
+  if (b.status === "confirmed" && b.decidedBy) meta = `${nights(n)}. Freigegeben von ${andList((b.approvals && b.approvals.length ? b.approvals.map(a => a.by) : [b.decidedBy]).map(id => person(id).name))} ${fmtWhen(b.decidedAt)}.`;
+  const sp = superPeople();
+  const hsLine = b.hs && b.status === "pending" && !person(b.by).super
+    ? `<div class="req-hs"><span class="hs-chip">${sunIcon()}Hochsaison</span><span class="dots" aria-hidden="true">${sp.map(p => `<i class="${approvedBy(b, p.id) ? "on" : ""}"></i>`).join("")}</span>${(b.approvals || []).length} von ${sp.length} Freigaben${awaiting(b).length ? `, es ${awaiting(b).length > 1 ? "fehlen" : "fehlt"} ${awaitingText(b)}` : ""}</div>` : "";
+  if (b.status === "rejected") meta = `Abgelehnt von ${person(b.decidedBy).name} ${fmtWhen(b.decidedAt)}.`;
+  if (b.status === "expired") meta = "Ohne Entscheidung verfallen.";
+  if (b.status === "cancelled") meta = `Storniert ${fmtWhen(b.decidedAt)}.`;
+  const actions = b.status === "pending" && canReject(u, b)
+    ? `<div class="req-actions">${canApprove(u, b) ? `<button class="btn btn-ink" data-approve="${b.id}">Freigeben</button>` : ""}<button class="btn btn-soft" data-reject="${b.id}">Ablehnen</button></div>` : "";
+  return `<div class="req"><button class="avatar s-${b.stamm}" data-open="${b.id}" aria-label="Details zu ${esc(p.name)}">${initials(p.name)}</button>
+    <div><button data-open="${b.id}" style="display:block;width:100%"><div class="req-name">${esc(p.name)}${b.guests ? ` <span class="faint" style="font-weight:400">+${b.guests}</span>` : ""}</div>
+      <div class="req-date">${fmtRange(b.from, b.to)}</div><div class="req-meta">${meta}</div>${hsLine}
+      ${b.reason ? `<div class="reason">„${esc(b.reason)}“</div>` : ""}</button>${actions}</div></div>`;
+}
+function renderReq() {
+  const u = me(), v = document.getElementById("v-req");
+  const pend = db.bookings.filter(b => b.status === "pending").sort((a, b) => a.createdAt - b.createdAt);
+  const forMe = pend.filter(b => canApprove(u, b));
+  const mine = db.bookings.filter(b => b.by === u.id && (b.status !== "confirmed" || b.decidedBy)).sort((a, b) => b.createdAt - a.createdAt);
+  const others = pend.filter(b => !forMe.includes(b) && b.by !== u.id);
+  const decided = db.bookings.filter(b => b.by !== u.id && (["rejected", "expired"].includes(b.status) || (b.status === "confirmed" && b.decidedBy))).sort((a, b) => b.decidedAt - a.decidedAt).slice(0, 6);
+  let html = `<div class="hello hello-req"><h1>Anfragen</h1><button class="avatar s-${u.stamm}" data-act="who" aria-label="Angemeldet als ${esc(u.name)}. Ansicht wechseln">${initials(u.name)}</button></div>`;
+  if (u.super) {
+    html += `<p class="lead">Anfragen aus anderen Familien gibst du mit einem Tipp frei, in der Hochsaison auch die aus deiner. Ablehnen geht nur mit Begründung.</p>
+      <div class="section"><div class="section-head"><h2>Wartet auf dich</h2></div>${forMe.length ? `<div class="panel req-list">${forMe.map(reqRow).join("")}</div>` : `<div class="panel none-yet">Nichts offen. Neue Anfragen aus den anderen Familien erscheinen hier.</div>`}</div>`;
+    if (others.length) html += `<div class="section"><div class="section-head"><h2>Wartet auf andere</h2></div><div class="panel req-list">${others.map(reqRow).join("")}</div></div>`;
+  } else {
+    html += `<p class="lead">Deine Anfragen reservieren die Tage sofort. Freigeben kann ${otherSupers(u.stamm).join(" oder ")}. In der Hochsaison müssen ${andList(superPeople().map(p => p.name))} alle zustimmen.</p>
+      <div class="section"><div class="section-head"><h2>Deine Anfragen</h2></div>${mine.length ? `<div class="panel req-list">${mine.map(reqRow).join("")}</div>` : `<div class="panel empty"><p>Du hast noch nichts angefragt.</p><button class="btn btn-ink" data-act="plan">Aufenthalt planen</button></div>`}</div>`;
+    if (others.length) html += `<div class="section"><div class="section-head"><h2>Offen bei anderen</h2></div><div class="panel req-list">${others.map(reqRow).join("")}</div></div>`;
+  }
+  if (decided.length) html += `<div class="section"><div class="section-head"><h2>Zuletzt entschieden</h2></div><div class="panel req-list">${decided.map(reqRow).join("")}</div></div>`;
+  v.innerHTML = html;
+}
+
+/* ---------- Sheets ---------- */
+const stack = [];
+function openSheet(html, { onMount, onClose, label } = {}) {
+  const layer = document.createElement("div");
+  layer.className = "layer";
+  layer.innerHTML = `<div class="scrim"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(label || "")}"><div class="sheet-head"><div class="grabber"></div></div><div class="sheet-body">${html}</div></div>`;
+  layer._onClose = onClose;
+  document.body.append(layer);
+  stack.push(layer);
+  document.body.classList.add("sheet-up");
+  layer.querySelector(".scrim").addEventListener("click", () => closeSheet(layer));
+  layer.addEventListener("click", e => { if (e.target.closest("[data-close]")) closeSheet(layer); });
+  dragToClose(layer);
+  if (onMount) onMount(layer.querySelector(".sheet-body"), layer);
+  requestAnimationFrame(() => requestAnimationFrame(() => layer.classList.add("open")));
+  return layer;
+}
+function closeSheet(layer = stack[stack.length - 1], vel = 0) {
+  if (!layer || !layer.isConnected) return;
+  const i = stack.indexOf(layer); if (i < 0) return; stack.splice(i, 1);
+  const sh = layer.querySelector(".sheet");
+  if (vel > 0) sh.style.transitionDuration = Math.max(.18, Math.min(.45, 1 / vel * 900)) + "s";
+  layer.classList.remove("open", "drag");
+  layer.style.setProperty("--dy", "0px");
+  sh.style.transform = "translateY(105%)";
+  if (!stack.length) { document.body.classList.remove("sheet-up", "sheet-drag"); document.getElementById("app").style.transform = ""; }
+  if (layer._onClose) layer._onClose();
+  setTimeout(() => layer.remove(), 520);
+}
+function closeAll() { while (stack.length) closeSheet(stack[stack.length - 1]); }
+function dragToClose(layer) {
+  const sheet = layer.querySelector(".sheet"), body = layer.querySelector(".sheet-body"), head = layer.querySelector(".sheet-head");
+  const app = document.getElementById("app");
+  let y0 = null, dy = 0, lastY = 0, lastT = 0, v = 0, fromBody = false;
+  const start = (e, isBody) => { if (isBody && body.scrollTop > 0) return; y0 = lastY = e.touches[0].clientY; dy = 0; lastT = performance.now(); fromBody = isBody; };
+  const move = e => {
+    if (y0 == null) return;
+    const y = e.touches[0].clientY; dy = Math.max(0, y - y0);
+    if (fromBody && dy <= 0) return;
+    if (dy > 4) { if (e.cancelable) e.preventDefault(); layer.classList.add("drag"); if (stack.length === 1) document.body.classList.add("sheet-drag"); }
+    const now = performance.now(); v = (y - lastY) / Math.max(1, now - lastT) * 1000; lastY = y; lastT = now;
+    layer.style.setProperty("--dy", dy + "px");
+    if (stack.length === 1) { const p = Math.min(1, dy / sheet.offsetHeight); app.style.transform = `translateY(calc((var(--sat) + 10px) * ${1 - p})) scale(${.93 + .07 * p})`; }
+  };
+  const end = () => {
+    if (y0 == null) return; y0 = null;
+    layer.classList.remove("drag"); document.body.classList.remove("sheet-drag");
+    if (dy > sheet.offsetHeight * .3 || (v > 700 && dy > 30)) { haptic(); closeSheet(layer, v); }
+    else { layer.style.setProperty("--dy", "0px"); app.style.transform = ""; }
+    dy = 0;
+  };
+  head.addEventListener("touchstart", e => start(e, false), { passive: true });
+  body.addEventListener("touchstart", e => start(e, true), { passive: true });
+  layer.addEventListener("touchmove", move, { passive: false });
+  layer.addEventListener("touchend", end); layer.addEventListener("touchcancel", end);
+}
+
+/* ---------- Plan a stay ---------- */
+function openPlan(range) {
+  const u = me();
+  const members = PEOPLE.filter(p => p.stamm === u.stamm);
+  const draft = { stamm: u.stamm, from: range.from, to: range.to, with: [], guests: 0, note: "" };
+  let booked = false;
+  const layer = openSheet(`<div class="s-${u.stamm}">
+      <div class="sheet-title"><h2>Aufenthalt planen</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+      <div class="field-group">
+        <div class="frow"><span class="frow-label">Anreise</span><div class="stepper"><button data-step="from" data-d="-1" aria-label="Anreise einen Tag früher">−</button><label class="datepick"><span class="v" data-v="from"></span><input type="date" id="plan-from" data-date="from" aria-label="Anreise wählen"></label><button data-step="from" data-d="1" aria-label="Anreise einen Tag später">+</button></div></div>
+        <div class="frow"><span class="frow-label">Abreise</span><div class="stepper"><button data-step="to" data-d="-1" aria-label="Abreise einen Tag früher">−</button><label class="datepick"><span class="v" data-v="to"></span><input type="date" id="plan-to" data-date="to" aria-label="Abreise wählen"></label><button data-step="to" data-d="1" aria-label="Abreise einen Tag später">+</button></div></div>
+      </div>
+      <div class="hs-warn" data-hs hidden role="alert"><span class="ico">${sunIcon(18)}</span><b>Hochsaison</b><p></p></div>
+      <div class="field-group"><div class="frow"><span class="frow-label">Wer kommt mit?</span></div>
+        <div class="people">${members.map(p => `<button class="pchip" data-person="${p.id}" aria-pressed="${p.id === u.id}" ${p.id === u.id ? "disabled" : ""}><span class="mini">${initials(p.name)}</span>${esc(p.id === u.id ? "Du" : p.name)}</button>`).join("")}</div>
+        <div class="frow"><span class="frow-label">Freunde</span><div class="stepper"><button data-guests="-1" aria-label="Weniger Freunde">−</button><span class="v" data-v="guests" style="min-width:48px"></span><button data-guests="1" aria-label="Mehr Freunde">+</button></div></div>
+      </div>
+      <div class="field-group"><textarea class="note" id="plan-note" rows="2" placeholder="Notiz für alle, zum Beispiel Ankunftszeit" aria-label="Notiz"></textarea></div>
+      <div class="impact" data-impact></div>
+      <div data-err></div>
+      <div class="actions"><button class="btn btn-c btn-wide" data-act="submit">${u.super ? "Aufenthalt buchen" : "Reservieren und Freigabe anfragen"}</button></div>
+    </div>`, { label: "Aufenthalt planen", onClose: () => { if (!booked) clearSel(); }, onMount: (body) => {
+      const blockedBy = (f, t) => conflicts(db.bookings, u.stamm, f, t).length > 0;
+      const paint = () => {
+        body.querySelector('[data-v="from"]').textContent = shortDay(draft.from);
+        body.querySelector('[data-v="to"]').textContent = shortDay(draft.to);
+        body.querySelector('[data-v="guests"]').textContent = draft.guests;
+        const fi = body.querySelector("#plan-from"), ti = body.querySelector("#plan-to");
+        fi.value = draft.from; fi.min = TODAY; ti.value = draft.to; ti.min = addDays(draft.from, 1);
+        const dis = (sel, off) => { body.querySelector(sel).disabled = off; };
+        dis('[data-step="from"][data-d="-1"]', addDays(draft.from, -1) < TODAY || blockedBy(addDays(draft.from, -1), draft.to) || diffDays(draft.from, draft.to) >= MAX_NIGHTS);
+        dis('[data-step="from"][data-d="1"]', addDays(draft.from, 1) >= draft.to);
+        dis('[data-step="to"][data-d="-1"]', addDays(draft.to, -1) <= draft.from);
+        dis('[data-step="to"][data-d="1"]', blockedBy(draft.from, addDays(draft.to, 1)) || diffDays(draft.from, draft.to) >= MAX_NIGHTS);
+        dis('[data-guests="-1"]', draft.guests <= 0);
+        dis('[data-guests="1"]', draft.guests >= 12);
+        state.sel = { from: draft.from, to: draft.to }; paintSel();
+        const v = validateDraft(db.bookings, u, draft, TODAY);
+        const errEl = body.querySelector("[data-err]"), imp = body.querySelector("[data-impact]"), btn = body.querySelector('[data-act="submit"]');
+        const hsEl = body.querySelector("[data-hs]"), hsOn = !u.super && touchesHighSeason(draft.from, draft.to);
+        if (hsOn !== !hsEl.hidden) { hsEl.hidden = !hsOn; if (hsOn) haptic(); }
+        if (hsOn) { const ys = [...new Set([draft.from.slice(0, 4), addDays(draft.to, -1).slice(0, 4)])].map(Number);
+          hsEl.querySelector("p").textContent = `Dein Zeitraum liegt in der Hochsaison (${ys.map(fmtHs).join(", ")}). Dann müssen ${andList(superPeople().map(p => p.name))} alle zustimmen. Ohne alle Zusagen verfällt die Anfrage nach ${EXPIRY_DAYS} Tagen.`; }
+        if (v) {
+          errEl.innerHTML = `<div class="err">${typeof v === "string" ? v : `Überschneidet sich mit ${esc(person(v.conflict.by).name)}, ${fmtRange(v.conflict.from, v.conflict.to)}. Das Haus ist pro Zeitraum für eine Familie reserviert.`}</div>`;
+          imp.style.display = "none"; btn.disabled = true; return;
+        }
+        errEl.innerHTML = ""; imp.style.display = ""; btn.disabled = false;
+        const im = impact(db.bookings, draft), overlap = im.nights - im.newNights;
+        imp.innerHTML = `<div class="impact-big num">${nights(im.nights)}</div>
+          <div class="impact-line"><span>Freinächte, die du nutzt</span><b>${im.freeUsed}</b></div>
+          <div class="impact-line"><span>Kostenpflichtige Nächte</span><b>${im.paidDelta}</b></div>
+          <div class="impact-line"><span>Kosten für deine Familie</span><b>${eur(im.cost)}</b></div>
+          <p class="impact-note">${overlap ? `${nights(overlap)} davon ist deine Familie ohnehin im Haus, die zählen nicht doppelt. ` : ""}${im.freeLeft ? `Danach hat ${STAMM_NAME[u.stamm]}s Familie in ${im.year} noch ${im.freeLeft === 1 ? "1 Freinacht" : im.freeLeft + " Freinächte"}.` : `Danach sind die Freinächte von ${STAMM_NAME[u.stamm]}s Familie für ${im.year} aufgebraucht.`}${u.super ? "" : ` Die Tage sind sofort für dich reserviert. ${approverPhrase(u.stamm, touchesHighSeason(draft.from, draft.to))}.`}</p>`;
+      };
+      body.addEventListener("change", e => {
+        const inp = e.target.closest("[data-date]"); if (!inp || !inp.value) return;
+        const k = inp.dataset.date, len = diffDays(draft.from, draft.to);
+        if (k === "from") { draft.from = inp.value < TODAY ? TODAY : inp.value; if (draft.to <= draft.from) draft.to = addDays(draft.from, Math.max(1, len)); }
+        else draft.to = inp.value <= draft.from ? addDays(draft.from, 1) : inp.value;
+        haptic(); paint();
+      });
+      body.addEventListener("click", e => {
+        const st = e.target.closest("[data-step]"), g = e.target.closest("[data-guests]"), pc = e.target.closest("[data-person]");
+        if (st && !st.disabled) { draft[st.dataset.step] = addDays(draft[st.dataset.step], Number(st.dataset.d)); haptic(); paint(); }
+        if (g && !g.disabled) { draft.guests = Math.max(0, Math.min(12, draft.guests + Number(g.dataset.guests))); haptic(); paint(); }
+        if (pc && !pc.disabled) { const id = pc.dataset.person, on = pc.getAttribute("aria-pressed") !== "true"; pc.setAttribute("aria-pressed", on); draft.with = on ? [...draft.with, id] : draft.with.filter(x => x !== id); haptic(); }
+        const sub = e.target.closest('[data-act="submit"]');
+        if (sub && !sub.classList.contains("busy")) {
+          draft.note = body.querySelector("textarea").value.trim();
+          busy(sub, true, "Wird gespeichert …");
+          api.create(u, draft).then(b => {
+            booked = true; haptic(); closeSheet(layer);
+            state.growId = b.id; state.sel = null; state.planning = false;
+            toast(b.status === "confirmed" ? "Gebucht" : `Reserviert. ${approverPhrase(u.stamm, b.hs)}.`);
+            setTab("cal", { month: b.from.slice(0, 7) });
+          }).catch(err => {
+            busy(sub, false);
+            body.querySelector("[data-err]").innerHTML = `<div class="err">${esc(err.message)}</div>`;
+            if (IS_LIVE && !err.offline) sync().then(paint).catch(() => {});
+          });
+        }
+      });
+      paint();
+    } });
+}
+
+/* ---------- Booking detail ---------- */
+function openBooking(id) {
+  const b = db.bookings.find(x => x.id === id); if (!b) return;
+  const u = me(), p = person(b.by), n = diffDays(b.from, b.to), paid = paidNightsOf(db.bookings, b);
+  const tl = [`<li class="ok">${p.super ? "Gebucht" : "Angefragt"} von ${esc(p.name)}<small>${fmtWhen(b.createdAt)}</small></li>`];
+  const apps = b.approvals && b.approvals.length ? b.approvals : (b.status === "confirmed" && b.decidedBy ? [{ by: b.decidedBy, at: b.decidedAt }] : []);
+  for (const a of apps) tl.push(`<li class="ok">Freigegeben von ${esc(person(a.by).name)}<small>${fmtWhen(a.at)}</small></li>`);
+  if (b.status === "pending") tl.push(`<li class="wait">Wartet auf ${awaitingText(b)}<small>${b.hs ? "Hochsaison: alle müssen zustimmen. " : ""}Verfällt in ${daysLeft(b)} ohne ${b.hs ? "alle Zusagen" : "Entscheidung"}</small></li>`);
+  if (b.status === "rejected") tl.push(`<li class="no">Abgelehnt von ${esc(person(b.decidedBy).name)}<small>„${esc(b.reason)}“</small></li>`);
+  if (b.status === "expired") tl.push(`<li class="no">Ohne Entscheidung verfallen</li>`);
+  if (b.status === "cancelled") tl.push(`<li class="no">Storniert von ${esc(person(b.decidedBy).name)}<small>${fmtWhen(b.decidedAt)}</small></li>`);
+  const actions = [];
+  if (canApprove(u, b)) actions.push(`<button class="btn btn-ink btn-wide" data-approve="${b.id}">Freigeben</button>`);
+  if (canReject(u, b)) actions.push(`<button class="btn btn-soft btn-wide" data-reject="${b.id}">Ablehnen</button>`);
+  if (b.status === "pending" && b.by === u.id) {
+    const txt = `Hallo ${awaiting(b).join(", hallo ")}, ich habe in der Casa-la-Paz-App ${fmtRange(b.from, b.to)} reserviert und bräuchte ${b.hs ? (awaiting(b).length > 1 ? "eure Freigaben (Hochsaison, alle müssen zustimmen)" : "noch deine Freigabe (Hochsaison)") : "eine Freigabe von einem von euch"}. Danke! ${p.name}${IS_LIVE ? "\n" + appUrl() : ""}`;
+    actions.push(`<a class="btn btn-soft btn-wide" data-remind href="https://wa.me/?text=${encodeURIComponent(txt)}" data-text="${esc(txt)}" target="_blank" rel="noopener">Per WhatsApp erinnern</a>`);
+  }
+  if (canCancel(u, b, TODAY)) actions.push(`<button class="btn btn-danger btn-wide" data-cancel="${b.id}">Stornieren</button>`);
+  openSheet(`<div class="s-${b.stamm}">
+      <div class="sheet-title">${statusChip(b)}<button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+      <h2 style="margin-top:12px">${fmtRange(b.from, b.to)}</h2>
+      <div class="band ${b.status === "pending" ? "pend" : ""}"></div>
+      <div class="kv"><span>Wer</span><span>${esc(partyLine(b))}</span></div>
+      <div class="kv"><span>Familie</span><span>${STAMM_NAME[b.stamm]}s Familie</span></div>
+      <div class="kv"><span>Dauer</span><span class="num">${nights(n)}</span></div>
+      ${b.hs ? `<div class="kv"><span>Saison</span><span><span class="hs-chip">${sunIcon()}Hochsaison</span></span></div>` : ""}
+      ${isActive(b) ? `<div class="kv"><span>Kostenpflichtig</span><span class="num">${paid ? `${nights(paid)}, ${eur(paid * RATE)}` : "keine, Freinächte"}</span></div>` : ""}
+      ${b.note ? `<div class="kv"><span>Notiz</span><span>${esc(b.note)}</span></div>` : ""}
+      <ul class="timeline">${tl.join("")}</ul>
+      ${actions.length ? `<div class="actions">${actions.join("")}</div>` : ""}
+    </div>`, { label: "Aufenthalt" });
+}
+
+/* ---------- Decide / cancel ---------- */
+function approve(id, btn) {
+  if (btn && btn.classList.contains("busy")) return;
+  busy(btn, true);
+  api.decide(id, "approve", "").then(b => { haptic(); closeAll(); toast(b.status === "confirmed" ? `Freigegeben: ${person(b.by).name}, ${fmtRange(b.from, b.to)}` : `Deine Freigabe zählt. Es ${awaiting(b).length > 1 ? "fehlen" : "fehlt"} noch ${awaitingText(b)}.`); render(); })
+    .catch(e => { busy(btn, false); afterError(e); });
+}
+function openReject(id) {
+  const b = db.bookings.find(x => x.id === id);
+  openSheet(`<div class="s-uli"><div class="sheet-title"><h2>Ablehnen</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+      <p class="muted" style="margin:8px 0 0">${esc(person(b.by).name)} sieht deine Begründung. Danach ist ${fmtRange(b.from, b.to)} wieder frei.</p>
+      <div class="field-group"><textarea class="note" id="reject-reason" rows="4" placeholder="Warum geht es nicht?" aria-label="Begründung"></textarea></div>
+      <div class="actions"><button class="btn btn-c btn-wide" data-act="do-reject" disabled>Ablehnen</button><button class="btn btn-soft btn-wide" data-close>Abbrechen</button></div></div>`,
+    { label: "Ablehnen", onMount: (body) => {
+      const ta = body.querySelector("textarea"), btn = body.querySelector('[data-act="do-reject"]');
+      ta.addEventListener("input", () => { btn.disabled = ta.value.trim().length < 3; });
+      btn.addEventListener("click", () => {
+        if (btn.classList.contains("busy")) return;
+        busy(btn, true);
+        api.decide(id, "reject", ta.value).then(() => { ta.blur(); haptic(); closeAll(); toast("Abgelehnt"); render(); })
+          .catch(err => { busy(btn, false); afterError(err); });
+      });
+      setTimeout(() => ta.focus(), 420);
+    } });
+}
+function doCancel(btn, id) {
+  if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; btn.textContent = "Wirklich stornieren?"; haptic(); setTimeout(() => { if (btn.isConnected) { btn.dataset.armed = ""; btn.textContent = "Stornieren"; } }, 3500); return; }
+  if (btn.classList.contains("busy")) return;
+  busy(btn, true);
+  api.cancel(id).then(() => { haptic(); closeAll(); toast("Storniert"); render(); })
+    .catch(e => { busy(btn, false); btn.dataset.armed = ""; afterError(e); });
+}
+
+/* ---------- Konto (Live) ---------- */
+function openAccount() {
+  const u = me();
+  openSheet(`<div class="s-${u.stamm}"><div class="sheet-title"><h2>Konto</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+    <div class="acct"><span class="avatar">${initials(u.name)}</span><div><div class="acct-name">${esc(u.name)}</div>
+      <div class="acct-role">${STAMM_NAME[u.stamm]}s Familie · ${u.super ? "bucht direkt, gibt frei" : "bucht mit Freigabe"}</div></div></div>
+    <div class="acct-list">
+      <div class="kv"><span>Angemeldet mit</span><span>${esc((sb.session && sb.session.email) || "")}</span></div>
+      <div class="kv"><span>Stand</span><span>${lastSync ? fmtSync(lastSync) : "offline"}</span></div>
+      <div class="kv"><span>Version</span><span class="num">${APP_VERSION}</span></div>
+    </div>
+    <div class="actions"><button class="btn btn-soft btn-wide" data-act="logout">Abmelden</button></div></div>`,
+    { label: "Konto", onMount: (body, layer) => {
+      body.addEventListener("click", e => {
+        const b = e.target.closest('[data-act="logout"]'); if (!b) return;
+        if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Wirklich abmelden?"; haptic(); return; }
+        haptic(); closeSheet(layer); signOut();
+      });
+    } });
+}
+function fmtSync(ms) {
+  const m = Math.round((Date.now() - ms) / 60e3);
+  return m < 1 ? "gerade eben" : m === 1 ? "vor 1 Minute" : m < 60 ? `vor ${m} Minuten` : fmtWhen(ms);
+}
+
+/* ---------- Prototype role switch ---------- */
+function openWho() {
+  if (IS_LIVE) { openAccount(); return; }
+  const u = me();
+  const groups = STAMME.map(s => `<div class="who-stamm">${STAMM_NAME[s]}s Familie</div>` + PEOPLE.filter(p => p.stamm === s).map(p =>
+    `<button class="who s-${p.stamm}" data-me="${p.id}" aria-current="${p.id === u.id}"><span class="avatar">${initials(p.name)}</span>
+      <span><span class="who-name">${esc(p.name)}</span><br><span class="who-role">${p.super ? "Super-User, bucht direkt, gibt frei" : "Bucht mit Freigabe"}</span></span>
+      <svg class="check" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 10.5 3.5 3.5 7.5-8"/></svg></button>`).join("")).join("");
+  openSheet(`<div class="sheet-title"><h2>Ansicht als</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+    <p class="muted" style="margin:6px 0 0;font-size:15px">Im Prototyp kannst du jede Rolle ausprobieren. In der fertigen App meldet sich jede Person selbst an.</p>
+    <div>${groups}</div>
+    <div class="proto">Prototyp mit Testdaten. Die Buchungen 2026 stammen aus dem bisherigen Kalender, 2027 ist erfunden. Änderungen bleiben nur auf diesem Gerät.</div>
+    <div class="actions"><button class="btn btn-soft btn-wide" data-act="reset">Testdaten zurücksetzen</button></div>`,
+    { label: "Ansicht wechseln", onMount: (body, layer) => {
+      body.addEventListener("click", e => {
+        const w = e.target.closest("[data-me]");
+        if (w) { db.me = w.dataset.me; save(); haptic(); closeSheet(layer); toast(`Ansicht: ${person(db.me).name}`); render(); }
+        if (e.target.closest('[data-act="reset"]')) { db = { me: db.me, bookings: seed(nowMs()) }; save(); haptic(); closeSheet(layer); toast("Testdaten zurückgesetzt"); render(); }
+      });
+    } });
+}
+
+/* ---------- Global events ---------- */
+document.addEventListener("click", e => {
+  const t = e.target;
+  if (t.closest(".layer") && !t.closest("[data-approve],[data-reject],[data-cancel],[data-remind]")) return; // sheets handle their own clicks
+  const tab = t.closest(".tab"); if (tab) { haptic(); setTab(tab.dataset.tab); return; }
+  const go = t.closest("[data-tab-go]"); if (go) { haptic(); setTab(go.dataset.tabGo, go.dataset.tabGo === "cal" ? { month: TODAY.slice(0, 7) } : {}); return; }
+  const a = t.closest("[data-approve]"); if (a) { approve(a.dataset.approve, a); return; }
+  const r = t.closest("[data-reject]"); if (r) { openReject(r.dataset.reject); return; }
+  const c = t.closest("[data-cancel]"); if (c) { doCancel(c, c.dataset.cancel); return; }
+  const o = t.closest("[data-open]"); if (o) { haptic(); openBooking(o.dataset.open); return; }
+  const day = t.closest("[data-day]"); if (day) { onDay(day.dataset.day); return; }
+  const nav = t.closest("[data-nav]"); if (nav) { haptic(); goIdx(state.calIdx + Number(nav.dataset.nav)); return; }
+  const rm = t.closest("[data-remind]");
+  if (rm && window.top === window.self && navigator.share) { e.preventDefault(); navigator.share({ text: rm.dataset.text }).catch(() => {}); return; }
+  const act = t.closest("[data-act]"); if (!act) return;
+  const k = act.dataset.act;
+  if (k === "who") { haptic(); openWho(); }
+  if (k === "year") { haptic(); openYear(); }
+  if (k === "quota") { haptic(); openQuota(); }
+  if (k === "today") { haptic(); goIdx(TODAY_IDX); }
+  if (k === "sel-cancel") { haptic(); clearSel(); }
+  if (k === "plan") {
+    haptic();
+    setTab("cal", { month: TODAY.slice(0, 7) });
+    state.planning = true;
+    bar("Wann möchtest du anreisen?", "Tippe auf den Anreisetag. Wische für spätere Monate.", "Abbrechen");
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { if (stack.length) closeSheet(); else if (state.sel || state.planning) clearSel(); }
+  if (state.tab === "cal" && !stack.length && (e.key === "ArrowRight" || e.key === "ArrowLeft") && !/INPUT|TEXTAREA/.test(document.activeElement?.tagName || "")) goIdx(state.calIdx + (e.key === "ArrowRight" ? 1 : -1));
+});
+
+/* ---------- Anmeldung (Live) ---------- */
+const loginEl = document.getElementById("login");
+const MARK = `<div class="lg-mark"><div class="sp-name">Casa la Paz</div><div class="sp-sub">Vinaròs</div><div class="sp-line"><i class="s-micha"></i><i class="s-uli"></i><i class="s-fanny"></i></div></div>`;
+let loginEmail = "", resendT = null;
+function showLogin(step = "email", msg = "") {
+  clearInterval(resendT);
+  loginEl.hidden = false; loginEl.classList.remove("leave");
+  if (step === "offline") {
+    loginEl.innerHTML = `${MARK}<div class="lg-card lg-step"><h1>Keine Verbindung</h1><p class="lead">Die App braucht beim ersten Öffnen Internet. Prüfe WLAN oder mobile Daten.</p>
+      <button class="btn btn-ink btn-wide" data-lg="retry">Erneut versuchen</button></div>`;
+  } else if (step === "email") {
+    loginEl.innerHTML = `${MARK}<form class="lg-card lg-step" data-lg="email-form" novalidate>
+      <h1>Anmelden</h1><p class="lead">Gib deine E-Mail-Adresse ein. Du bekommst einen Code.</p>
+      <input class="lg-input" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="name@beispiel.de" aria-label="E-Mail-Adresse" value="${esc(loginEmail)}">
+      <div data-err>${msg ? `<div class="err">${esc(msg)}</div>` : ""}</div>
+      <button class="btn btn-ink btn-wide" type="submit">Code senden</button></form>
+      <p class="lg-hint">Nur für die Familie. Du musst dich auf jedem Gerät nur einmal anmelden.</p>`;
+  } else {
+    loginEl.innerHTML = `${MARK}<form class="lg-card lg-step" data-lg="code-form" novalidate>
+      <h1>Code eingeben</h1><p class="lead">Wir haben ihn an <b>${esc(loginEmail)}</b> geschickt.</p>
+      <input class="lg-input lg-code" name="code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="······" aria-label="Code aus der E-Mail">
+      <div data-err>${msg ? `<div class="err">${esc(msg)}</div>` : ""}</div>
+      <button class="btn btn-ink btn-wide" type="submit">Anmelden</button>
+      <div class="lg-links"><button type="button" class="lg-link" data-lg="other">Andere E-Mail</button><button type="button" class="lg-link" data-lg="resend" disabled>Neuer Code</button></div></form>
+      <p class="lg-hint">Keine E-Mail da? Schau im Spam-Ordner nach.<br>Absender: Casa la Paz</p>`;
+    let left = 60; const rs = loginEl.querySelector('[data-lg="resend"]');
+    const tick = () => { if (!rs.isConnected) return clearInterval(resendT); rs.disabled = left > 0; rs.textContent = left > 0 ? `Neuer Code (${left})` : "Neuer Code"; left--; };
+    tick(); resendT = setInterval(tick, 1000);
+  }
+  const inp = loginEl.querySelector("input");
+  if (inp) setTimeout(() => inp.focus(), 350);
+}
+function lgError(msg) { const el = loginEl.querySelector("[data-err]"); if (el) el.innerHTML = `<div class="err">${esc(msg)}</div>`; }
+async function sendCode(btn) {
+  busy(btn, true, "Wird gesendet …");
+  try { await sb.open("/auth/v1/otp", { email: loginEmail, create_user: true }); showLogin("code"); }
+  catch (e) { busy(btn, false); lgError(e.message); }
+}
+async function verifyCode(code, btn) {
+  busy(btn, true, "Wird geprüft …");
+  try {
+    const d = await sb.open("/auth/v1/verify", { type: "email", email: loginEmail, token: code });
+    sb.store(sb.pick(d));
+    await sync();
+    enterApp();
+  } catch (e) {
+    busy(btn, false);
+    if (e.member === false) { sb.store(null); showLogin("email", e.message); return; }
+    lgError(e.message);
+    const inp = loginEl.querySelector("input"); if (inp) { inp.value = ""; inp.focus(); }
+  }
+}
+loginEl.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target, btn = f.querySelector('[type="submit"]');
+  if (btn.classList.contains("busy")) return;
+  if (f.dataset.lg === "email-form") {
+    loginEmail = f.email.value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail)) { lgError("Diese E-Mail-Adresse sieht nicht richtig aus."); return; }
+    sendCode(btn);
+  } else {
+    const code = f.code.value.replace(/\D/g, "");
+    if (code.length < 6) { lgError("Der Code hat 6 Ziffern."); return; }
+    verifyCode(code, btn);
+  }
+});
+loginEl.addEventListener("input", e => {
+  if (e.target.name !== "code") return;
+  e.target.value = e.target.value.replace(/\D/g, "");
+  if (e.target.value.length === 6) { const btn = loginEl.querySelector('[type="submit"]'); if (!btn.classList.contains("busy")) verifyCode(e.target.value, btn); }
+});
+loginEl.addEventListener("click", e => {
+  const k = e.target.closest("[data-lg]"); if (!k || k.tagName === "FORM") return;
+  const a = k.dataset.lg;
+  if (a === "other") showLogin("email");
+  if (a === "resend" && !k.disabled) { k.disabled = true; sb.open("/auth/v1/otp", { email: loginEmail, create_user: true }).then(() => { toast("Neuer Code ist unterwegs"); showLogin("code"); }).catch(err => lgError(err.message)); }
+  if (a === "retry") { busy(k, true, "Verbinde …"); start().catch(() => "offline").then(route); }
+});
+function enterApp() {
+  setTab(({ "#kalender": "cal", "#anfragen": "req", "#uebersicht": "home" })[location.hash] || "home");
+  if (!loginEl.hidden) {
+    document.activeElement && document.activeElement.blur && document.activeElement.blur();
+    loginEl.classList.add("leave"); setTimeout(() => { loginEl.hidden = true; loginEl.innerHTML = ""; }, 500);
+    haptic();
+  }
+}
+function signedOut(msg) { sb.store(null); ls.set(CACHE_KEY, ""); closeAll(); showLogin("email", msg || ""); }
+async function signOut() {
+  const s = sb.session;
+  if (s) sb.raw("/auth/v1/logout", "POST", {}, s.access_token).catch(() => {});
+  signedOut("");
+}
+
+/* Neue Version auf dem Server? Dann einmal frisch laden (gegen veraltete Zwischenspeicher). */
+async function checkVersion() {
+  if (!IS_LIVE) return;
+  try {
+    const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" }); if (!r.ok) return;
+    const v = (await r.json()).version;
+    if (v && v !== APP_VERSION && sessionStorage.getItem("casa-reload") !== v) {
+      sessionStorage.setItem("casa-reload", v);
+      location.replace(location.pathname + "?v=" + encodeURIComponent(v) + location.hash);
+    }
+  } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  if (todayISO() !== TODAY) { location.reload(); return; }   // über Nacht offen gelassen
+  checkVersion();
+  if (IS_LIVE && Date.now() - lastSync > 20e3) syncQuiet();
+});
+
+/* ---------- Boot ---------- */
+function route(res) {
+  const [where, msg] = Array.isArray(res) ? res : [res, ""];
+  if (where === "app") enterApp(); else showLogin(where === "offline" ? "offline" : "email", msg);
+}
+async function start() {
+  if (!IS_LIVE) { load(); return "app"; }
+  checkVersion();
+  if (!sb.load()) return "login";
+  const cache = readCache();
+  if (cache) { applyData(cache); lastSync = cache.at || 0; syncQuiet(); return "app"; }
+  try { await sync(); return "app"; }
+  catch (e) {
+    if (e.offline) return "offline";
+    sb.store(null); return e.member === false ? ["login", e.message] : "login";
+  }
+}
+(async () => {
+  const sp = document.getElementById("splash");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduced) requestAnimationFrame(() => requestAnimationFrame(() => sp.classList.add("in")));
+  const [res] = await Promise.all([start().catch(() => "offline"), new Promise(r => setTimeout(r, reduced ? 0 : 1900))]);
+  route(res);
+  const done = () => { sp.remove(); document.body.classList.remove("booting", "reveal"); };
+  if (reduced) { done(); return; }
+  sp.classList.add("out"); document.body.classList.add("reveal");
+  setTimeout(done, 1100);
+})();
+})();
+</script>
+</body>
+</html>
