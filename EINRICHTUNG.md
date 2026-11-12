@@ -1,6 +1,6 @@
 # Casa la Paz – Einrichtung der Live-App
 
-**Stand:** 12.11.2026 · App-Version 4.2.0
+**Stand:** 12.11.2026 · App-Version 4.2.1 (live)
 **Für:** Leon (einmalig)
 **Dauer:** ca. 60–75 Minuten am Laptop, danach 10 Minuten pro Familienmitglied am iPhone
 **Kosten:** 0 € (GitHub Free, Supabase Free, Gmail)
@@ -251,18 +251,16 @@ Schick Claude in diesem Projekt eine Nachricht mit:
 2. lädt alles ins Repo hoch
 3. sagt dir Bescheid, sobald du mit Teil F weitermachen kannst
 
-✅ **Fertig, wenn** Claude meldet: „Code liegt im Repo“.
+✅ **Fertig, wenn** Claude meldet: „Code liegt im Repo“. *(Erledigt am 12.11., 19:05.)*
 
 ---
 
 ## Teil F – GitHub Pages und Wartungs-Jobs aktivieren (10 Min.)
 
-**F1. Veröffentlichung einschalten**
-1. Im Repo *Settings* → links *Pages*.
-2. Source: **Deploy from a branch** · Branch: **`main`** · Ordner: **`/ (root)`** → *Save*.
-3. 1–2 Minuten warten, Seite neu laden. Oben steht: „Your site is live at `https://<organisation>.github.io`“.
+**F1. Veröffentlichung prüfen** (bei Organisations-Seiten schaltet GitHub sie automatisch ein)
+1. Im Repo *Settings* → links *Pages*: Dort steht „Your site is live at `https://casalapaz.github.io`“, Source *Deploy from a branch*, Branch `main`, `/ (root)`. Steht dort etwas anderes: genau so einstellen → *Save*.
 
-✅ **Fertig, wenn** die Adresse im Browser den Anmeldebildschirm „Casa la Paz – Anmelden“ zeigt.
+✅ **Fertig, wenn** `https://casalapaz.github.io` den Anmeldebildschirm „Casa la Paz – Anmelden“ zeigt. *(Am 12.11. von Claude geprüft: online, Version 4.2.1, Datenbank erreichbar, unbekannte E-Mails werden abgewiesen.)*
 
 **F2. Sicherungs-Passwort ausdenken**
 Ein langes neues Passwort (z. B. vom Passwortmanager generiert) → #8. **Ohne dieses Passwort lassen sich die Sicherungen nicht öffnen.**
