@@ -152,7 +152,7 @@ check("Ab 2.9.2026 keine Hochsaison", hs("2026-09-02", "2026-09-05") is False)
 check("Hochsaison 2028 = Juli/August", hs("2028-06-28", "2028-07-01") is False and hs("2028-06-28", "2028-07-02") is True)
 check("Jahreswechsel-Aufenthalt im Winter", hs("2026-12-28", "2027-01-04") is False)
 # App und Datenbank müssen dieselbe Hochsaison haben
-html = open("/home/claude/casa-la-paz/repo/index.html", encoding="utf-8").read()
+html = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "index.html"), encoding="utf-8").read()
 logic = html[html.index("/* ===================== LOGIC START"):html.index("/* ===================== LOGIC END")]
 js = logic + "\nconsole.log(JSON.stringify([2026, 2027, 2028].map(highSeason)));"
 out = json.loads(subprocess.run(["node", "-e", js], capture_output=True, text=True).stdout)
@@ -229,6 +229,73 @@ check("Uli bucht mit Svantje", r and r[0][1] == "confirmed", e)
 r, e = as_user("martina@x.de", "select count(*) from bookings")
 check("Martina ohne E-Mail kann nichts lesen", r == [(0,)], (r, e))
 admin("delete from bookings")
+
+print("Mitteilungen")
+admin("delete from bookings"); admin("delete from push_subscriptions")
+EP = "https://web.push.apple.com/QF"
+KEYS = ("B" + "x" * 86, "a" * 22)
+def sub(who, ep):
+    return as_user(f"{who}@x.de", "select save_push_subscription(%s, %s, %s)", (ep, *KEYS))
+def due():
+    r, e = as_role("service_role", "select person_id, endpoint, booked_by, high_season, open_count, booking_id::text from push_due()")
+    assert e is None, e
+    return r
+r, e = as_role("anon", "select save_push_subscription('https://x', 'y', 'z')")
+check("anon kann kein Gerät anmelden", e and "permission denied" in e, e)
+r, e = as_user("leon@x.de", "select * from push_subscriptions")
+check("Geräte-Liste für Nutzer nicht lesbar", e and "permission denied" in e, e)
+r, e = as_user("leon@x.de", "select * from push_due()")
+check("push_due nur für den Server", e and "permission denied" in e, e)
+r, e = as_user("leon@x.de", "select push_report('[]', '{}', '{}')")
+check("push_report nur für den Server", e and "permission denied" in e, e)
+r, e = as_user("fremd@y.de", "select save_push_subscription(%s, %s, %s)", (EP + "0", *KEYS))
+check("Fremde E-Mail kann kein Gerät anmelden", e and "nicht angemeldet" in e, e)
+r, e = sub("uli", "http://unsicher")
+check("Nur https-Adressen", e and "check" in e.lower(), e)
+# Bestehende offene Anfrage vor dem Einschalten -> keine Flut
+r, e = create("karlina", "2027-10-01", "2027-10-04"); old = r[0][0]
+r, e = sub("micha", EP + "m1"); check("Micha meldet Gerät an", e is None, e)
+sub("micha", EP + "m2"); sub("uli", EP + "u1"); sub("fanny", EP + "f1"); sub("leon", EP + "l1")
+check("Alte Anfrage gilt beim Einschalten als gemeldet", [x for x in due() if x[5] == str(old)] == [], due())
+n = admin("select count(*) from push_subscriptions")[0][0]
+check("Gerät erneut anmelden legt nichts doppelt an", (sub("micha", EP + "m1")[1] is None) and admin("select count(*) from push_subscriptions")[0][0] == n)
+# Neue Anfrage außerhalb der Hochsaison (Leon, Michas Familie) -> Uli + Fanny
+r, e = create("leon", "2027-10-20", "2027-10-24"); b1 = r[0][0]
+d = due()
+check("Neue Anfrage: Uli und Fanny bekommen sie, nicht Micha/Leon", sorted({x[0] for x in d}) == ["fanny", "uli"], d)
+check("Name und Hochsaison im Ergebnis", all(x[2] == "Leon" and x[3] is False for x in d), d)
+check("Zähler = offene Anfragen der Person (Uli: Karlina zählt nicht, eigene Familie)", {x[0]: x[4] for x in d} == {"uli": 1, "fanny": 2}, d)
+as_role("service_role", "select push_report('[{\"booking_id\": \"%s\", \"person_id\": \"uli\"}]', '{%s}', '{%s}')" % (b1, EP + "f1", EP + "u1"))
+d = due()
+check("Nach Versand an Uli: nichts mehr offen für Uli", not [x for x in d if x[0] == "uli"], d)
+check("Abgemeldetes Gerät (410) wird gelöscht", admin("select count(*) from push_subscriptions where endpoint = %s", (EP + "f1",))[0][0] == 0)
+check("Ohne Gerät: Fanny erscheint nicht", not [x for x in d if x[0] == "fanny"], d)
+check("last_ok wird gesetzt", admin("select last_ok is not null from push_subscriptions where endpoint = %s", (EP + "u1",)) == [(True,)])
+sub("fanny", EP + "f2")
+check("Neues Gerät: offene Anfragen gelten als gemeldet", not [x for x in due() if x[0] == "fanny"], due())
+# Hochsaison: alle drei inkl. eigener Familie
+r, e = create("leon", "2027-07-20", "2027-07-24"); b2 = r[0][0]
+d = [x for x in due() if x[5] == str(b2)]
+check("Hochsaison: Micha (beide Geräte), Uli, Fanny", sorted(x[0] for x in d) == ["fanny", "micha", "micha", "uli"] and all(x[3] for x in d), d)
+decide("uli", b2, "approve")
+d = [x for x in due() if x[5] == str(b2)]
+check("Wer schon freigegeben hat, bekommt nichts mehr", sorted(x[0] for x in d) == ["fanny", "micha", "micha"], d)
+decide("fanny", b2, "reject", "Da ist schon was los")
+check("Abgelehnt: keine Mitteilung mehr fällig", not [x for x in due() if x[5] == str(b2)], due())
+# Verfall
+admin("update bookings set created_at = now() - interval '22 days' where id = %s", (b1,))
+check("Verfallene Anfrage: keine Mitteilung, Zähler sinkt", not [x for x in due() if x[5] == str(b1)] and admin("select status from bookings where id = %s", (b1,)) == [("expired",)])
+# Abmelden
+r, e = as_user("uli@x.de", "select delete_push_subscription(%s)", (EP + "m1",))
+check("Fremdes Gerät kann nicht abgemeldet werden", admin("select count(*) from push_subscriptions where endpoint = %s", (EP + "m1",))[0][0] == 1)
+as_user("micha@x.de", "select delete_push_subscription(%s)", (EP + "m1",))
+check("Eigenes Gerät abmelden", admin("select count(*) from push_subscriptions where endpoint = %s", (EP + "m1",))[0][0] == 0)
+for i in range(7): sub("leon", EP + f"l{i+2}")
+check("Höchstens 5 Geräte pro Person", admin("select count(*) from push_subscriptions where person_id = 'leon'")[0][0] == 5)
+src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "migrate-4.4.0-mitteilungen.sql"), encoding="utf-8").read().strip()
+setup_src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "setup.sql"), encoding="utf-8").read()
+check("Migration 4.4.0 steht wortgleich in setup.sql", src in setup_src)
+admin("delete from bookings"); admin("delete from push_subscriptions")
 
 print(f"\n{ok} ok, {fail} fehlgeschlagen")
 sys.exit(1 if fail else 0)

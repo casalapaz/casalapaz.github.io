@@ -44,6 +44,7 @@
   --f-HH: #4F9A97;
   --ok: #2F7D5B;
   --sol: #D9822B;
+  --alert: #FF3B30;   /* iOS-Rot, nur für Zähler */
   --behind: #0E1820;
   --shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 1px 2px rgba(21,35,46,.05), 0 8px 24px -12px rgba(21,35,46,.18);
   --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Geist", "Helvetica Neue", Arial, sans-serif;
@@ -61,7 +62,7 @@
     --line: rgba(236, 240, 241, 0.08); --line-2: rgba(236, 240, 241, 0.15);
     --micha: #5B90D6; --uli: #D9616B; --fanny: #98B45E;
     --micha-soft: rgba(91,144,214,.2); --uli-soft: rgba(217,97,107,.2); --fanny-soft: rgba(152,180,94,.2);
-    --azahar: #E3AE45; --behind: #03080C; --sol: #F0A04E;
+    --azahar: #E3AE45; --behind: #03080C; --sol: #F0A04E; --alert: #FF453A;
     --shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px -14px rgba(0,0,0,.7);
     color-scheme: dark;
   }
@@ -72,7 +73,7 @@
   --line: rgba(236, 240, 241, 0.08); --line-2: rgba(236, 240, 241, 0.15);
   --micha: #5B90D6; --uli: #D9616B; --fanny: #98B45E;
   --micha-soft: rgba(91,144,214,.2); --uli-soft: rgba(217,97,107,.2); --fanny-soft: rgba(152,180,94,.2);
-  --azahar: #E3AE45; --behind: #03080C; --sol: #F0A04E;
+  --azahar: #E3AE45; --behind: #03080C; --sol: #F0A04E; --alert: #FF453A;
   --shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px -14px rgba(0,0,0,.7);
   color-scheme: dark;
 }
@@ -159,7 +160,7 @@ h2 { font-family: var(--display); font-weight: 650; font-size: 22px; letter-spac
 .tile-t svg { color: var(--ink-3); }
 .tile-s { font-size: 13px; color: var(--ink-2); margin-top: 2px; line-height: 1.3; }
 .tile-big { font-family: var(--display); font-weight: 700; font-size: 44px; letter-spacing: -.04em; line-height: 1; }
-.tile-badge { position: absolute; top: 14px; right: 14px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px; background: var(--uli); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+.tile-badge { position: absolute; top: 14px; right: 14px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 12px; background: var(--alert); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
 .mini-month { flex: 1; min-height: 0; max-height: 96px; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(var(--r), minmax(0, 1fr)); gap: 3px; margin-top: 8px; }
 .mini-month i { border-radius: 3px; background: var(--well); }
 .mini-month i.x { visibility: hidden; }
@@ -273,6 +274,16 @@ h2 { font-family: var(--display); font-weight: 650; font-size: 22px; letter-spac
 .empty { padding: 22px 20px; }
 .empty p { margin: 0 0 16px; color: var(--ink-2); }
 
+/* ---------- Mitteilungen ---------- */
+.notif-card { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin-top: 18px; padding: 16px; animation: enter .35s var(--ease) both; }
+.notif-card .ni { grid-row: span 2; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--ink); position: relative; box-shadow: inset 0 0 0 1px var(--line); }
+.notif-card .ni i { position: absolute; top: -5px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--alert); color: #fff; font: 700 11px/18px var(--ui); font-style: normal; text-align: center; }
+.notif-card b { font-size: 16px; font-weight: 650; letter-spacing: -.01em; align-self: end; }
+.notif-card p { margin: 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.35; }
+.notif-card .row { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 12px; }
+.notif-card .btn { min-height: 46px; border-radius: 14px; font-size: 16px; }
+.notif-hint { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.4; }
+
 /* ---------- Tab bar ---------- */
 .tabbar { flex: none; display: grid; grid-template-columns: repeat(3, 1fr); padding: 6px 12px calc(var(--sab) + 4px); position: relative; z-index: 8;
   background: color-mix(in srgb, var(--ground) 82%, transparent); backdrop-filter: saturate(1.8) blur(22px); -webkit-backdrop-filter: saturate(1.8) blur(22px); border-top: 1px solid var(--line); }
@@ -280,7 +291,9 @@ h2 { font-family: var(--display); font-weight: 650; font-size: 22px; letter-spac
 .tab svg { width: 27px; height: 27px; transition: transform .3s var(--spring); }
 .tab[aria-selected="true"] { color: var(--ink); }
 .tab:active svg { transform: scale(.86); }
-.tab .badge { position: absolute; top: 2px; left: calc(50% + 7px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--uli); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+.tab .badge:not([hidden]) { animation: pop .45s var(--spring) both; }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
+.tab .badge { position: absolute; top: 2px; left: calc(50% + 7px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--alert); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
 
 /* ---------- Sheets ---------- */
 .layer { position: fixed; inset: 0; z-index: 50; }
@@ -688,7 +701,7 @@ if (typeof window === "undefined") return;
    Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
    Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
    Die Datei ist in beiden Umgebungen identisch. */
-const APP_VERSION = "4.3.0";
+const APP_VERSION = "4.4.0";
 const LIVE = {
   hosts: ["casalapaz.github.io"],
   url: "https://nwrkrotxhgtxtshprfur.supabase.co",
@@ -850,6 +863,7 @@ const api = {
     const v = validateDraft(db.bookings, u, draft, TODAY);
     if (v) throw fail(typeof v === "string" ? v : "Überschneidung mit einer anderen Familie.");
     const row = await sb.call("/rest/v1/rpc/create_booking", "POST", { p_arrive: draft.from, p_depart: draft.to, p_companions: draft.with || [], p_guests: draft.guests || 0, p_note: draft.note || "" });
+    if (row.status === "pending") notif.kick();   // Super-User benachrichtigen
     await sync().catch(() => {});
     return db.bookings.find(b => b.id === row.id) || fromRow(row);
   },
@@ -872,6 +886,115 @@ function busy(btn, on, text) {
   if (!btn) return;
   if (on) { btn.dataset.label = btn.textContent; btn.classList.add("busy"); if (text) btn.textContent = text; }
   else { btn.classList.remove("busy"); if (btn.dataset.label) btn.textContent = btn.dataset.label; }
+}
+
+/* ---------- Mitteilungen ----------
+   Push an Super-User bei neuen Anfragen + Zähler am App-Symbol (wie Mail).
+   iPhone: ab iOS 16.4, nur in der App vom Home-Bildschirm, nach einmaligem Erlauben.
+   Wer was bekommt, entscheidet die Datenbank (push_due); verschickt wird von der
+   Server-Funktion "push" (supabase/functions/push). */
+const PUSH_FN = "/functions/v1/push", NOTIF_LATER = "casa-la-paz.notif-later.v1";
+const openForMe = () => (db && me() ? db.bookings.filter(b => canApprove(me(), b)).length : 0);
+const urlB64 = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+const notif = {
+  reg: null, key: null, subscribed: false, started: false,
+  supported: () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window,
+  standalone: () => navigator.standalone === true || matchMedia("(display-mode: standalone)").matches,
+  ios: () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
+  /* demo | browser (Safari statt Home-Bildschirm) | unsupported | denied | on | off */
+  state() {
+    if (!IS_LIVE) return "demo";
+    if (!this.supported()) return this.ios() && !this.standalone() ? "browser" : "unsupported";
+    if (Notification.permission === "denied") return "denied";
+    return Notification.permission === "granted" && this.subscribed ? "on" : "off";
+  },
+  /* Beim Start: Service Worker anmelden, Abo der angemeldeten Person zuordnen, Schlüssel vorladen
+     (damit der Tipp auf „Einschalten“ ohne Umweg die iOS-Abfrage auslöst). */
+  async init() {
+    if (this.started || !IS_LIVE || !this.supported()) return;
+    this.started = true;
+    navigator.serviceWorker.addEventListener("message", ev => { if (ev.data && ev.data.type === "open") { closeAll(); setTab("req"); syncQuiet(); } });
+    try { await navigator.serviceWorker.register("sw.js"); this.reg = await navigator.serviceWorker.ready; } catch (e) { return; }
+    try {
+      const sub = await this.reg.pushManager.getSubscription();
+      this.subscribed = !!sub && Notification.permission === "granted";
+      if (this.subscribed) this.save(sub).catch(() => {});
+    } catch (e) {}
+    if (me() && me().super && Notification.permission !== "denied") this.loadKey();
+    this.badge();
+    if (canRender()) render();
+  },
+  async loadKey() {
+    if (this.key) return this.key;
+    try { const r = await fetch(LIVE.url + PUSH_FN, { headers: { apikey: LIVE.key }, cache: "no-store" }); if (r.ok) this.key = (await r.json()).publicKey || null; } catch (e) {}
+    return this.key;
+  },
+  save(sub) {
+    const j = sub.toJSON();
+    return sb.call("/rest/v1/rpc/save_push_subscription", "POST", { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+  },
+  /* Muss direkt aus einem Tipp kommen: die erste iOS-Abfrage startet ohne vorheriges await. */
+  enable() {
+    const st = this.state();
+    if (st === "demo") return Promise.reject(fail("Nur in der echten App. Dort fragt das iPhone an dieser Stelle um Erlaubnis.", { mine: true }));
+    if (st === "browser") return Promise.reject(fail("Mitteilungen gibt es nur in der App vom Home-Bildschirm, nicht in Safari.", { mine: true }));
+    if (st === "unsupported") return Promise.reject(fail("Dafür braucht das iPhone iOS 16.4 oder neuer (Einstellungen › Allgemein › Softwareupdate).", { mine: true }));
+    if (st === "denied") return Promise.reject(fail("Mitteilungen sind am iPhone aus: Einstellungen › Mitteilungen › Casa la Paz › Mitteilungen erlauben.", { mine: true }));
+    const opts = k => ({ userVisibleOnly: true, applicationServerKey: urlB64(k) });
+    const first = this.reg && this.key ? this.reg.pushManager.subscribe(opts(this.key)) : Notification.requestPermission();
+    return (async () => {
+      let sub = await first;
+      if (typeof sub === "string") {   // Weg ohne vorgeladenen Schlüssel
+        if (sub !== "granted") throw fail(sub === "denied" ? "Nicht erlaubt. Einschalten geht später unter Einstellungen › Mitteilungen › Casa la Paz." : "Nicht eingeschaltet.", { mine: true });
+        if (!this.reg) { await navigator.serviceWorker.register("sw.js"); this.reg = await navigator.serviceWorker.ready; }
+        const key = await this.loadKey();
+        if (!key) throw fail("Mitteilungen sind auf dem Server noch nicht eingerichtet. Melde dich bei Leon.", { mine: true });
+        sub = (await this.reg.pushManager.getSubscription()) || await this.reg.pushManager.subscribe(opts(key));
+      }
+      await this.save(sub);
+      this.subscribed = true; ls.set(NOTIF_LATER, "");
+      this.badge();
+    })().catch(e => {
+      if (e && (e.mine || e.offline || e.status)) throw e;
+      if (e && e.name === "NotAllowedError") throw fail("Nicht erlaubt. Einschalten geht später unter Einstellungen › Mitteilungen › Casa la Paz.", { mine: true });
+      throw fail("Einschalten hat nicht geklappt. Bitte noch einmal versuchen.", { mine: true });
+    });
+  },
+  async disable() {
+    try {
+      const sub = this.reg && await this.reg.pushManager.getSubscription();
+      if (sub) { await sb.call("/rest/v1/rpc/delete_push_subscription", "POST", { p_endpoint: sub.endpoint }).catch(() => {}); await sub.unsubscribe().catch(() => {}); }
+    } catch (e) {}
+    this.subscribed = false;
+    if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
+  },
+  /* Zähler am App-Symbol = Anzahl „Wartet auf dich“ (gleiche Zahl wie am Reiter Anfragen). */
+  badge() {
+    if (!IS_LIVE || !navigator.setAppBadge || !("Notification" in window) || Notification.permission !== "granted") return;
+    const n = openForMe();
+    (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {});
+  },
+  /* Nach einer neuen Anfrage: Server verschickt alles Fällige (idempotent). */
+  kick() { if (IS_LIVE) fetch(LIVE.url + PUSH_FN, { method: "POST", headers: { apikey: LIVE.key }, keepalive: true }).catch(() => {}); },
+  later() { ls.set(NOTIF_LATER, String(Date.now())); },
+  showCard() {
+    const u = me(); if (!u || !u.super) return false;
+    const st = this.state(); if (st !== "off" && st !== "demo") return false;
+    const t = Number(ls.get(NOTIF_LATER) || 0);
+    return !t || Date.now() - t > 14 * DAY;
+  }
+};
+function notifCard() {
+  if (!notif.showCard()) return "";
+  return `<div class="panel notif-card" id="notif-card"><span class="ni" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><i>1</i></span>
+    <b>Neue Anfragen sofort sehen</b><p>Mitteilung aufs iPhone und roter Zähler am App-Symbol, sobald jemand auf deine Freigabe wartet.</p>
+    <div class="row"><button class="btn btn-ink" data-act="notif-on">Einschalten</button><button class="btn btn-soft" data-act="notif-later">Später</button></div></div>`;
+}
+function turnOnNotif(btn) {
+  if (btn && btn.classList.contains("busy")) return;
+  haptic(); busy(btn, true);
+  notif.enable().then(() => { toast("Mitteilungen sind an"); render(); if (stack.length) openAccountRefresh(); })
+    .catch(e => { busy(btn, false); toast(e.message); });
 }
 
 /* ---------- State ---------- */
@@ -976,8 +1099,10 @@ function render(opts = {}) {
   if (state.tab === "req") renderReq();
 }
 function renderBadge() {
-  const n = db.bookings.filter(b => canApprove(me(), b)).length;
+  const n = openForMe();
   const el = document.getElementById("badge"); el.hidden = !n; el.textContent = n;
+  el.setAttribute("aria-label", n === 1 ? "1 wartet auf dich" : `${n} warten auf dich`);
+  notif.badge();
 }
 function topBar() {
   const u = me();
@@ -1344,7 +1469,7 @@ function renderReq() {
   const decided = db.bookings.filter(b => b.by !== u.id && (["rejected", "expired"].includes(b.status) || (b.status === "confirmed" && b.decidedBy))).sort((a, b) => b.decidedAt - a.decidedAt).slice(0, 6);
   let html = `<div class="hello hello-req"><h1>Anfragen</h1><button class="avatar s-${u.stamm}" data-act="who" aria-label="Angemeldet als ${esc(u.name)}. Ansicht wechseln">${initials(u.name)}</button></div>`;
   if (u.super) {
-    html += `<p class="lead">Anfragen aus anderen Familien gibst du mit einem Tipp frei, in der Hochsaison auch die aus deiner. Ablehnen geht nur mit Begründung.</p>
+    html += `<p class="lead">Anfragen aus anderen Familien gibst du mit einem Tipp frei, in der Hochsaison auch die aus deiner. Ablehnen geht nur mit Begründung.</p>${notifCard()}
       <div class="section"><div class="section-head"><h2>Wartet auf dich</h2></div>${forMe.length ? `<div class="panel req-list">${forMe.map(reqRow).join("")}</div>` : `<div class="panel none-yet">Nichts offen. Neue Anfragen aus den anderen Familien erscheinen hier.</div>`}</div>`;
     if (others.length) html += `<div class="section"><div class="section-head"><h2>Wartet auf andere</h2></div><div class="panel req-list">${others.map(reqRow).join("")}</div></div>`;
   } else {
@@ -1578,15 +1703,41 @@ function openAccount() {
       <div class="kv"><span>Stand</span><span>${lastSync ? fmtSync(lastSync) : "offline"}</span></div>
       <div class="kv"><span>Version</span><span class="num">${APP_VERSION}</span></div>
     </div>
+    ${u.super ? `<div id="acct-notif">${acctNotifHTML()}</div>` : ""}
     <div class="actions"><button class="btn btn-soft btn-wide" data-act="logout">Abmelden</button></div></div>`,
     { label: "Konto", onMount: (body, layer) => {
       body.addEventListener("click", e => {
+        const on = e.target.closest('[data-act="notif-on"]'); if (on) { turnOnNotif(on); return; }
+        const off = e.target.closest('[data-act="notif-off"]');
+        if (off) {
+          if (off.dataset.armed !== "1") { off.dataset.armed = "1"; off.textContent = "Wirklich ausschalten?"; haptic(); return; }
+          haptic(); busy(off, true); notif.disable().then(() => { toast("Mitteilungen sind aus"); openAccountRefresh(); render(); });
+          return;
+        }
         const b = e.target.closest('[data-act="logout"]'); if (!b) return;
         if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Wirklich abmelden?"; haptic(); return; }
         haptic(); closeSheet(layer); signOut();
       });
     } });
 }
+/* Konto: Zeile „Mitteilungen“ (nur Super-User – nur sie bekommen welche). */
+function acctNotifHTML() {
+  const st = notif.state(), n = openForMe();
+  const label = { on: "An", off: "Aus", denied: "Am iPhone aus", browser: "Nur in der App", unsupported: "iOS zu alt", demo: "Vorschau" }[st];
+  const hint = {
+    on: `Du bekommst eine Mitteilung, sobald eine Anfrage auf deine Freigabe wartet. Der rote Zähler am App-Symbol zeigt, wie viele${n ? ` (gerade ${n})` : ""}.`,
+    off: "Mitteilung aufs iPhone und roter Zähler am App-Symbol, sobald jemand auf deine Freigabe wartet.",
+    denied: "Einschalten unter Einstellungen › Mitteilungen › Casa la Paz › Mitteilungen erlauben, Kennzeichen an.",
+    browser: "Mitteilungen gibt es nur, wenn du Casa la Paz über das Symbol auf dem Home-Bildschirm öffnest.",
+    unsupported: "Mitteilungen brauchen iOS 16.4 oder neuer.",
+    demo: "In der echten App fragt das iPhone hier einmal um Erlaubnis."
+  }[st];
+  const btn = st === "on" ? `<button class="btn btn-soft btn-wide" data-act="notif-off">Mitteilungen ausschalten</button>`
+    : st === "off" || st === "demo" ? `<button class="btn btn-ink btn-wide" data-act="notif-on">Mitteilungen einschalten</button>` : "";
+  return `<div class="acct-list" style="margin-top:0"><div class="kv" style="border-top:1px solid var(--line)"><span>Mitteilungen</span><span>${label}</span></div></div>
+    <p class="notif-hint">${hint}</p>${btn ? `<div class="actions" style="margin-top:14px">${btn}</div>` : ""}`;
+}
+function openAccountRefresh() { const el = document.getElementById("acct-notif"); if (el) el.innerHTML = acctNotifHTML(); }
 function fmtSync(ms) {
   const m = Math.round((Date.now() - ms) / 60e3);
   return m < 1 ? "gerade eben" : m === 1 ? "vor 1 Minute" : m < 60 ? `vor ${m} Minuten` : fmtWhen(ms);
@@ -1635,6 +1786,8 @@ document.addEventListener("click", e => {
   if (k === "quota") { haptic(); openQuota(); }
   if (k === "today") { haptic(); goIdx(TODAY_IDX); }
   if (k === "sel-cancel") { haptic(); clearSel(); }
+  if (k === "notif-on") turnOnNotif(act);
+  if (k === "notif-later") { haptic(); notif.later(); const c = document.getElementById("notif-card"); if (c) c.remove(); toast("Geht jederzeit über dein Konto"); }
   if (k === "plan") {
     haptic();
     setTab("cal", { month: TODAY.slice(0, 7) });
@@ -1727,6 +1880,7 @@ loginEl.addEventListener("click", e => {
 });
 function enterApp() {
   setTab(({ "#kalender": "cal", "#anfragen": "req", "#uebersicht": "home" })[location.hash] || "home");
+  notif.init();
   if (!loginEl.hidden) {
     document.activeElement && document.activeElement.blur && document.activeElement.blur();
     loginEl.classList.add("leave"); setTimeout(() => { loginEl.hidden = true; loginEl.innerHTML = ""; }, 500);
@@ -1735,6 +1889,9 @@ function enterApp() {
 }
 function signedOut(msg) { sb.store(null); ls.set(CACHE_KEY, ""); closeAll(); showLogin("email", msg || ""); }
 async function signOut() {
+  if (notif.subscribed) await Promise.race([notif.disable(), new Promise(r => setTimeout(r, 2500))]);
+  else if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
+  notif.started = false;
   const s = sb.session;
   if (s) sb.raw("/auth/v1/logout", "POST", {}, s.access_token).catch(() => {});
   signedOut("");

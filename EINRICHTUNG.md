@@ -1,11 +1,11 @@
 # Casa la Paz – Einrichtung der Live-App
 
-**Stand:** 12.11.2026 · App-Version 4.2.1 (live)
+**Stand:** 12.11.2026 · App-Version 4.4.0 (live)
 **Für:** Leon (einmalig)
 **Dauer:** ca. 60–75 Minuten am Laptop, danach 10 Minuten pro Familienmitglied am iPhone
 **Kosten:** 0 € (GitHub Free, Supabase Free, Gmail)
 
-> **So liest du diese Anleitung:** Arbeite die Teile **A bis H der Reihe nach** ab. Jeder Schritt endet mit **✅ Fertig, wenn …** – erst dann weiter. Menünamen in Supabase und GitHub können leicht abweichen; gemeint ist immer der naheliegende Punkt. Hängst du irgendwo, schick Claude einen Screenshot.
+> **So liest du diese Anleitung:** Arbeite die Teile **A bis F, dann I, dann G und H** ab. Jeder Schritt endet mit **✅ Fertig, wenn …** – erst dann weiter. Menünamen in Supabase und GitHub können leicht abweichen; gemeint ist immer der naheliegende Punkt. Hängst du irgendwo, schick Claude einen Screenshot.
 
 ---
 
@@ -20,7 +20,8 @@
 | **D** | GitHub: Konto, Organisation, Repo, mit Claude verbinden | Leon | 15 Min. |
 | **E** | Claude schaltet die App scharf | **Claude** | 10 Min. |
 | **F** | GitHub Pages und Wartungs-Jobs aktivieren | Leon | 10 Min. |
-| **G** | Testlauf mit zwei Personen | Leon + Micha | 15 Min. |
+| **I** | Mitteilungen einrichten (neu in 4.4.0) – **vor G** | Leon | 10 Min. |
+| **G** | Testlauf mit zwei Personen (inkl. Mitteilung) | Leon + Micha | 15 Min. |
 | **H** | Familie aufs iPhone bringen | Leon | 10 Min. pro Person |
 
 **Begriffe in einem Satz:**
@@ -44,7 +45,7 @@
 
 ## Teil A – Notizzettel vorbereiten
 
-Während der Einrichtung entstehen neun Werte. Lege dafür **einen Eintrag „Casa la Paz“ in deinem Passwortmanager** an und trage sie dort ein, sobald sie entstehen.
+Während der Einrichtung entstehen zehn Werte. Lege dafür **einen Eintrag „Casa la Paz“ in deinem Passwortmanager** an und trage sie dort ein, sobald sie entstehen.
 
 | # | Wert | Entsteht in | Geheim? | An Claude schicken? |
 |---|---|---|---|---|
@@ -57,6 +58,7 @@ Während der Einrichtung entstehen neun Werte. Lege dafür **einen Eintrag „Ca
 | 7 | **GitHub-Organisation** (z. B. `casalapaz`) | D1b | nein | **ja** |
 | 8 | **Sicherungs-Passwort** (neu ausdenken, lang) | F3 | **ja** | **nein** |
 | 9 | **Supabase-Konto-Passwort** (Login bei supabase.com) | C1 | **ja** | **nein** |
+| 10 | **Supabase-Zugangs-Token** (`sbp_…`) | I2 | **ja** | **nein** |
 
 > ⚠️ **Geheime Werte gehören nie in einen Chat** – auch nicht zu Claude. Sie werden nur in Supabase bzw. GitHub eingetragen.
 
@@ -286,6 +288,45 @@ Ein langes neues Passwort (z. B. vom Passwortmanager generiert) → #8. **Ohne d
 
 ---
 
+## Teil I – Mitteilungen einrichten (10 Min., neu in 4.4.0, vor Teil G)
+
+**Was es bringt:** Fragt jemand an, bekommen die Super-User, deren Freigabe fehlt, eine Mitteilung aufs iPhone – mit rotem Zähler am App-Symbol wie bei Mail (außerhalb der Hochsaison die beiden aus den anderen Familien, in der Hochsaison alle drei). In der App steht derselbe Zähler am Reiter *Anfragen*.
+
+**Grenzen (von Apple vorgegeben):** nur iPhone mit **iOS 16.4 oder neuer**, nur in der App **vom Home-Bildschirm** (nicht in Safari), jede Person muss **einmal erlauben**. Der Zähler am Symbol aktualisiert sich bei jeder neuen Mitteilung und beim Öffnen der App – entscheidet z. B. Uli eine Anfrage, sieht Fanny die alte Zahl, bis sie die App öffnet (stille Hintergrund-Updates erlaubt Apple nicht).
+
+**I1. Datenbank ergänzen**
+1. Im Repo die Datei **`supabase/migrate-4.4.0-mitteilungen.sql`** öffnen → rechts oben *Copy raw file*.
+2. Supabase → *SQL Editor* → *New query* → einfügen → *Run*. (Die Warnung „destructive operations“ ist bei diesem Skript unbedenklich.)
+
+✅ **Fertig, wenn** „Success. No rows returned“ erscheint.
+
+**I2. Zugangs-Token für GitHub anlegen** (damit GitHub die Server-Funktion für die Mitteilungen ausspielen darf)
+1. **supabase.com/dashboard/account/tokens** öffnen – angemeldet mit dem **App-Konto** (Gmail #1), nicht mit einem privaten.
+2. *Generate new token* → Name `GitHub Mitteilungen` → Ablauf: *Never* (falls gefragt) → *Generate token*.
+3. Den Token (`sbp_…`) kopieren → Notizzettel **#10**. Er wird nur einmal angezeigt.
+
+ℹ️ Der Token kann alles im Supabase-Konto der App – deshalb nur als GitHub-Secret ablegen, nirgends sonst. Weil das Konto nur Casa la Paz enthält, reicht sein Zugriff nicht weiter.
+
+**I3. Token bei GitHub hinterlegen**
+1. Repo → *Settings* → *Secrets and variables* → *Actions* → *New repository secret*.
+2. Name: **`SUPABASE_ACCESS_TOKEN`**, Wert: #10 → *Add secret*.
+
+**I4. Mitteilungen ausspielen**
+1. Repo → Reiter *Actions* → links **„Mitteilungen ausspielen“** → *Run workflow* → *Run workflow* (die 404-Seite danach ist der bekannte Anzeigefehler, der Lauf startet trotzdem).
+2. 1–2 Minuten warten.
+
+✅ **Fertig, wenn** der Lauf einen **grünen Haken** hat. Beim ersten Lauf entstehen dabei die Schlüssel für die Mitteilungen; sie werden direkt in Supabase gespeichert und tauchen nirgends sonst auf.
+❌ **Rot?** Lauf anklicken, Screenshot an Claude.
+
+**I5. Einschalten – je einmal bei Micha, Uli und Fanny**
+1. App **über das Symbol auf dem Home-Bildschirm** öffnen.
+2. Reiter *Anfragen* → Karte „Neue Anfragen sofort sehen“ → **Einschalten** → iPhone fragt → **Erlauben**. (Alternativ: Avatar oben rechts → *Konto* → *Mitteilungen einschalten*.)
+
+✅ **Fertig, wenn** im *Konto* bei *Mitteilungen* „An“ steht.
+ℹ️ Sub-User sehen den Schalter nicht – sie bekommen keine Mitteilungen.
+
+---
+
 ## Teil G – Testlauf mit zwei Personen (15 Min.)
 
 Bevor die Familie loslegt, einmal den ganzen Ablauf prüfen – du als Sub-User, Micha als Super-User.
@@ -301,6 +342,7 @@ Bevor die Familie loslegt, einmal den ganzen Ablauf prüfen – du als Sub-User,
 5. Zweiter Test **in der Hochsaison** (z. B. 2 Nächte im Juli 2027).
 
 ✅ Beim Planen erscheint der orange **Hochsaison-Hinweis**; Toast „Micha, Uli und Fanny geben frei“.
+✅ Hat Micha Teil I5 erledigt: Auf seinem iPhone erscheint wenige Sekunden später „Neue Anfrage von Leon“, das App-Symbol zeigt eine rote **1** (beim ersten Test außerhalb der Hochsaison bekommt Micha keine – da geben Uli oder Fanny frei).
 
 **G2. Micha (sein iPhone oder du loggst dich auf einem zweiten Gerät mit seiner Adresse ein)**
 1. Anmelden wie in G1.
@@ -349,6 +391,8 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 | Wach-halten-Aufruf | täglich, 07:17 Uhr (Sommerzeit 08:17) | Kostenlose Supabase-Projekte schlafen sonst nach 7 Tagen ohne Nutzung ein. |
 | Verschlüsselte Sicherung | sonntags, 04:41 Uhr (Sommerzeit 05:41) | Alle Personen und Buchungen in `backups/`, die letzten 12 Wochen. |
 | App-Updates | beim Öffnen | Die App prüft `version.json` und lädt neue Versionen selbst. Niemand muss etwas tun. |
+| Mitteilungen | bei jeder neuen Anfrage | Die App stößt die Server-Funktion `push` an; die Datenbank bestimmt, wer benachrichtigt wird (jede Anfrage höchstens einmal pro Person). |
+| Server-Funktion neu ausspielen | wenn sich `supabase/functions/` ändert | Workflow „Mitteilungen ausspielen“ läuft dann von selbst. |
 
 **Kosten im Blick:** alles 0 €. Grenzen, die für Casa la Paz nie erreicht werden: GitHub Pages 1 GB / 100 GB Datenverkehr pro Monat (die App hat 120 KB); Supabase 500 MB Datenbank, 50.000 aktive Nutzer pro Monat. Einzige echte Grenze: **2 aktive kostenlose Supabase-Projekte pro Konto** – relevant erst bei weiteren Apps mit eigener Datenbank.
 
@@ -369,6 +413,8 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 | P7 | Wartungs-Job rot | Meist ein Tippfehler im Secret-Namen (F3). Namen exakt wie in der Tabelle. |
 | P8 | Sicherung öffnen | Datei aus `backups/` herunterladen, am Mac im Terminal: `gpg --decrypt casa-la-paz-latest.json.gpg > sicherung.json`, Passwort #8. Oder Claude die Datei geben und das Passwort selbst eintippen. |
 | P10 | „Supabase wach halten“ läuft nicht mehr (Reiter *Actions*: Workflow grau/„disabled“) | GitHub schaltet geplante Jobs in öffentlichen Repos nach **60 Tagen ohne Änderung am Repo** ab. Die sonntägliche Sicherung legt jede Woche eine neue Datei ab und hält das Repo damit aktiv – solange sie grün läuft. Wenn doch: Workflow anklicken → *Enable workflow*, dann prüfen, warum die Sicherung rot ist. |
+| P11 | Mitteilung kommt nicht an | 1. iPhone: *Einstellungen* → *Mitteilungen* → *Casa la Paz* → Mitteilungen erlauben und **Kennzeichen** an; Fokus/„Nicht stören“ prüfen. 2. In der App *Konto* → Mitteilungen: steht dort „An“? 3. Supabase → *Edge Functions* → `push` → *Logs*: Zeilen „push an … fehlgeschlagen“ an Claude schicken. Eine Mitteilung kommt pro Anfrage nur einmal; alte Anfragen von vor dem Einschalten zählt nur der rote Zähler. |
+| P12 | Workflow „Mitteilungen ausspielen“ gelb/„übersprungen“ | Secret `SUPABASE_ACCESS_TOKEN` fehlt oder ist falsch benannt (I3). Danach *Run workflow*. |
 | P9 | Person hinzufügen | *Table Editor* → `people` → *Insert row*: `id` (kurz, klein, z. B. `lena`), `name`, `stamm` (`micha`/`uli`/`fanny`), `is_super` = false, `email`, `sort`. |
 
 ---
@@ -381,5 +427,6 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 - [ ] D: privates GitHub-Konto, Organisation, Repo `<organisation>.github.io` (public), mit Claude verbunden
 - [ ] E: drei Werte an Claude, Code liegt im Repo
 - [ ] F: Pages live, 4 Secrets, beide Jobs grün
-- [ ] G: Testlauf Leon + Micha ok, Testbuchungen storniert
+- [ ] I: Mitteilungen – SQL, Token, Workflow grün, bei Micha/Uli/Fanny eingeschaltet
+- [ ] G: Testlauf Leon + Micha ok (inkl. Mitteilung), Testbuchungen storniert
 - [ ] H: Bestandsbuchungen importiert, Familie eingeladen, Eltern eingerichtet, kalender.digital stillgelegt
