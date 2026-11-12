@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E3344"/><stop offset="1" stop-color="#12202B"/></linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7EEDF"/><stop offset="1" stop-color="#F4D3A3"/></linearGradient>
+    <clipPath id="page"><rect x="172" y="262" width="680" height="600" rx="70"/></clipPath>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <g clip-path="url(#page)">
+    <rect x="172" y="262" width="680" height="600" fill="url(#sky)"/>
+    <circle cx="512" cy="660" r="140" fill="#E07A2E"/>
+    <rect x="172" y="660" width="680" height="210" fill="#1F5AA6"/>
+    <rect x="412" y="712" width="200" height="18" rx="9" fill="#F7EEDF" opacity=".75"/>
+    <rect x="457" y="764" width="110" height="18" rx="9" fill="#F7EEDF" opacity=".45"/>
+    <rect x="172" y="262" width="680" height="110" fill="#E07A2E"/>
+  </g>
+  <rect x="322" y="200" width="44" height="130" rx="22" fill="#EDF0EF"/>
+  <rect x="658" y="200" width="44" height="130" rx="22" fill="#EDF0EF"/>
+</svg>
