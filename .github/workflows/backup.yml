@@ -22,8 +22,8 @@ jobs:
           hdr=(-H "apikey: $SUPABASE_SECRET")
           # Alte "service_role"-Schlüssel (beginnen mit eyJ) brauchen zusätzlich den Authorization-Header
           case "$SUPABASE_SECRET" in eyJ*) hdr+=(-H "Authorization: Bearer $SUPABASE_SECRET");; esac
-          curl -sf "${hdr[@]}" "$SUPABASE_URL/rest/v1/bookings?select=*&order=arrive.asc" > bookings.json
-          curl -sf "${hdr[@]}" "$SUPABASE_URL/rest/v1/people?select=*&order=sort.asc" > people.json
+          curl -sS --fail-with-body "${hdr[@]}" "$SUPABASE_URL/rest/v1/bookings?select=*&order=arrive.asc" -o bookings.json || { echo "Fehler beim Lesen der Buchungen:"; cat bookings.json; exit 1; }
+          curl -sS --fail-with-body "${hdr[@]}" "$SUPABASE_URL/rest/v1/people?select=*&order=sort.asc" -o people.json || { echo "Fehler beim Lesen der Personen:"; cat people.json; exit 1; }
           jq -n --slurpfile b bookings.json --slurpfile p people.json \
             '{exported_at: (now | todate), people: $p[0], bookings: $b[0]}' > backup.json
           echo "Buchungen: $(jq length bookings.json), Personen: $(jq length people.json)"

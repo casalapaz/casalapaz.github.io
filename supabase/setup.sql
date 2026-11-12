@@ -276,7 +276,9 @@ create policy "Familie liest Buchungen" on public.bookings
   for select to authenticated using (public.is_member());
 
 -- Projekt ist mit "Automatically expose new tables = aus" angelegt: alle Rechte hier ausdrücklich.
-grant usage on schema public to anon, authenticated;
+grant usage on schema public to anon, authenticated, service_role;
+-- Wöchentliche Sicherung (GitHub Action mit Secret Key = Rolle service_role) darf alles lesen, nichts schreiben.
+grant select on public.people, public.bookings, public.high_season to service_role;
 
 -- Kein direktes Schreiben: nur über die Funktionen oben.
 revoke all on public.people, public.bookings from anon, authenticated;
