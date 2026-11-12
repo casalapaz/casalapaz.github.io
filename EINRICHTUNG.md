@@ -1,6 +1,6 @@
 # Casa la Paz – Einrichtung der Live-App
 
-**Stand:** 12.11.2026 · App-Version 4.4.0 (live)
+**Stand:** 12.11.2026 · App-Version 4.5.0 (live)
 **Für:** Leon (einmalig)
 **Dauer:** ca. 60–75 Minuten am Laptop, danach 10 Minuten pro Familienmitglied am iPhone
 **Kosten:** 0 € (GitHub Free, Supabase Free, Gmail)
@@ -20,7 +20,7 @@
 | **D** | GitHub: Konto, Organisation, Repo, mit Claude verbinden | Leon | 15 Min. |
 | **E** | Claude schaltet die App scharf | **Claude** | 10 Min. |
 | **F** | GitHub Pages und Wartungs-Jobs aktivieren | Leon | 10 Min. |
-| **I** | Mitteilungen einrichten (neu in 4.4.0) – **vor G** | Leon | 10 Min. |
+| **I** | Mitteilungen einrichten (neu in 4.4/4.5) – **vor G** | Leon | 10 Min. |
 | **G** | Testlauf mit zwei Personen (inkl. Mitteilung) | Leon + Micha | 15 Min. |
 | **H** | Familie aufs iPhone bringen | Leon | 10 Min. pro Person |
 
@@ -288,14 +288,16 @@ Ein langes neues Passwort (z. B. vom Passwortmanager generiert) → #8. **Ohne d
 
 ---
 
-## Teil I – Mitteilungen einrichten (10 Min., neu in 4.4.0, vor Teil G)
+## Teil I – Mitteilungen einrichten (10 Min., neu in 4.4/4.5, vor Teil G)
 
-**Was es bringt:** Fragt jemand an, bekommen die Super-User, deren Freigabe fehlt, eine Mitteilung aufs iPhone – mit rotem Zähler am App-Symbol wie bei Mail (außerhalb der Hochsaison die beiden aus den anderen Familien, in der Hochsaison alle drei). In der App steht derselbe Zähler am Reiter *Anfragen*.
+**Was es bringt:**
+- **Neue Anfrage** → Mitteilung an die Super-User, deren Freigabe fehlt (außerhalb der Hochsaison die beiden aus den anderen Familien, in der Hochsaison alle drei) – mit rotem Zähler am App-Symbol wie bei Mail. In der App steht derselbe Zähler am Reiter *Anfragen*.
+- **Anfrage fertig entschieden** → Mitteilung an die Person, die angefragt hat: „Freigegeben: … – Micha, Fanny und Uli haben freigegeben“ erst, wenn **alle nötigen** Freigaben da sind (Hochsaison: nach der dritten, nicht nach der ersten oder zweiten); oder „Abgelehnt: … – Fanny hat abgelehnt: „Begründung““.
 
 **Grenzen (von Apple vorgegeben):** nur iPhone mit **iOS 16.4 oder neuer**, nur in der App **vom Home-Bildschirm** (nicht in Safari), jede Person muss **einmal erlauben**. Der Zähler am Symbol aktualisiert sich bei jeder neuen Mitteilung und beim Öffnen der App – entscheidet z. B. Uli eine Anfrage, sieht Fanny die alte Zahl, bis sie die App öffnet (stille Hintergrund-Updates erlaubt Apple nicht).
 
 **I1. Datenbank ergänzen**
-1. Im Repo die Datei **`supabase/migrate-4.4.0-mitteilungen.sql`** öffnen → rechts oben *Copy raw file*.
+1. Im Repo die Datei **`supabase/migrate-4.5.0-mitteilungen.sql`** öffnen → rechts oben *Copy raw file*. (Ersetzt die frühere 4.4.0-Datei – egal, ob du die schon ausgeführt hast.)
 2. Supabase → *SQL Editor* → *New query* → einfügen → *Run*. (Die Warnung „destructive operations“ ist bei diesem Skript unbedenklich.)
 
 ✅ **Fertig, wenn** „Success. No rows returned“ erscheint.
@@ -318,12 +320,12 @@ Ein langes neues Passwort (z. B. vom Passwortmanager generiert) → #8. **Ohne d
 ✅ **Fertig, wenn** der Lauf einen **grünen Haken** hat. Beim ersten Lauf entstehen dabei die Schlüssel für die Mitteilungen; sie werden direkt in Supabase gespeichert und tauchen nirgends sonst auf.
 ❌ **Rot?** Lauf anklicken, Screenshot an Claude.
 
-**I5. Einschalten – je einmal bei Micha, Uli und Fanny**
+**I5. Einschalten – je einmal pro Person und iPhone**
 1. App **über das Symbol auf dem Home-Bildschirm** öffnen.
-2. Reiter *Anfragen* → Karte „Neue Anfragen sofort sehen“ → **Einschalten** → iPhone fragt → **Erlauben**. (Alternativ: Avatar oben rechts → *Konto* → *Mitteilungen einschalten*.)
+2. Reiter *Anfragen* → Karte „Neue Anfragen sofort sehen“ (Super-User) bzw. „Bescheid bekommen“ (alle anderen) → **Einschalten** → iPhone fragt → **Erlauben**. (Alternativ: Avatar oben rechts → *Konto* → *Mitteilungen einschalten*.)
 
 ✅ **Fertig, wenn** im *Konto* bei *Mitteilungen* „An“ steht.
-ℹ️ Sub-User sehen den Schalter nicht – sie bekommen keine Mitteilungen.
+ℹ️ Wer nicht einschaltet, bekommt nichts – auch keine Ablehnung. Bei Micha, Uli und Fanny ist es Pflicht, für alle anderen empfohlen (gehört in die WhatsApp-Nachricht in H2).
 
 ---
 
@@ -348,7 +350,10 @@ Bevor die Familie loslegt, einmal den ganzen Ablauf prüfen – du als Sub-User,
 1. Anmelden wie in G1.
 2. Tab *Anfragen*: Die Hochsaison-Anfrage steht unter „Wartet auf dich“ mit „0 von 3 Freigaben“ → *Freigeben*.
 
-✅ Toast „Deine Freigabe zählt. Es fehlen noch Uli und Fanny.“
+✅ Toast „Deine Freigabe zählt. Es fehlen noch Uli und Fanny.“ – du bekommst **noch keine** Mitteilung (erst nach der dritten Freigabe).
+3. Für die Oktober-Anfrage: Uli oder Fanny gibt frei (oder du meldest dich mit deren Adresse an).
+
+✅ Auf deinem iPhone: „Freigegeben: … – Uli hat freigegeben. Dein Aufenthalt (2 Nächte) ist bestätigt.“
 ℹ️ Die Oktober-Anfrage sieht Micha unter „Wartet auf andere“ – richtig so, außerhalb der Hochsaison gibt nur eine andere Familie frei.
 
 **G3. Aufräumen**
@@ -372,6 +377,7 @@ Bevor die Familie loslegt, einmal den ganzen Ablauf prüfen – du als Sub-User,
 > 1. Link in **Safari** öffnen (nicht in WhatsApp)
 > 2. Teilen-Symbol → „Zum Home-Bildschirm“
 > 3. App über das neue Symbol öffnen, eigene E-Mail eingeben, Code aus der Mail eintippen – fertig, ihr bleibt angemeldet.
+> 4. Unter „Anfragen“ auf **Einschalten** tippen und Mitteilungen erlauben – dann erfahrt ihr sofort, wenn eure Anfrage freigegeben ist.
 > Ab sofort bitte nur noch hier eintragen. Fragen → Leon.
 
 **H3. Eltern persönlich einrichten**
@@ -391,7 +397,7 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 | Wach-halten-Aufruf | täglich, 07:17 Uhr (Sommerzeit 08:17) | Kostenlose Supabase-Projekte schlafen sonst nach 7 Tagen ohne Nutzung ein. |
 | Verschlüsselte Sicherung | sonntags, 04:41 Uhr (Sommerzeit 05:41) | Alle Personen und Buchungen in `backups/`, die letzten 12 Wochen. |
 | App-Updates | beim Öffnen | Die App prüft `version.json` und lädt neue Versionen selbst. Niemand muss etwas tun. |
-| Mitteilungen | bei jeder neuen Anfrage | Die App stößt die Server-Funktion `push` an; die Datenbank bestimmt, wer benachrichtigt wird (jede Anfrage höchstens einmal pro Person). |
+| Mitteilungen | bei jeder neuen Anfrage und jeder finalen Entscheidung | Die App stößt die Server-Funktion `push` an; die Datenbank bestimmt, wer benachrichtigt wird (jede Mitteilung höchstens einmal). |
 | Server-Funktion neu ausspielen | wenn sich `supabase/functions/` ändert | Workflow „Mitteilungen ausspielen“ läuft dann von selbst. |
 
 **Kosten im Blick:** alles 0 €. Grenzen, die für Casa la Paz nie erreicht werden: GitHub Pages 1 GB / 100 GB Datenverkehr pro Monat (die App hat 120 KB); Supabase 500 MB Datenbank, 50.000 aktive Nutzer pro Monat. Einzige echte Grenze: **2 aktive kostenlose Supabase-Projekte pro Konto** – relevant erst bei weiteren Apps mit eigener Datenbank.

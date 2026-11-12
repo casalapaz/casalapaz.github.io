@@ -701,7 +701,7 @@ if (typeof window === "undefined") return;
    Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
    Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
    Die Datei ist in beiden Umgebungen identisch. */
-const APP_VERSION = "4.4.0";
+const APP_VERSION = "4.5.0";
 const LIVE = {
   hosts: ["casalapaz.github.io"],
   url: "https://nwrkrotxhgtxtshprfur.supabase.co",
@@ -870,6 +870,7 @@ const api = {
   async decide(id, verdict, reason) {
     if (!IS_LIVE) { const b = decide(db.bookings, me(), id, verdict, reason, nowMs(), superIds()); save(); return b; }
     const row = await sb.call("/rest/v1/rpc/decide_booking", "POST", { p_id: id, p_verdict: verdict, p_reason: reason || "" });
+    if (row.status !== "pending") notif.kick();   // fertig entschieden: anfragende Person benachrichtigen
     await sync().catch(() => {});
     return fromRow(row);
   },
@@ -889,7 +890,8 @@ function busy(btn, on, text) {
 }
 
 /* ---------- Mitteilungen ----------
-   Push an Super-User bei neuen Anfragen + Zähler am App-Symbol (wie Mail).
+   Push an Super-User bei neuen Anfragen, an die anfragende Person bei der finalen
+   Entscheidung (alle nötigen Freigaben oder Ablehnung) + Zähler am App-Symbol (wie Mail).
    iPhone: ab iOS 16.4, nur in der App vom Home-Bildschirm, nach einmaligem Erlauben.
    Wer was bekommt, entscheidet die Datenbank (push_due); verschickt wird von der
    Server-Funktion "push" (supabase/functions/push). */
@@ -920,7 +922,7 @@ const notif = {
       this.subscribed = !!sub && Notification.permission === "granted";
       if (this.subscribed) this.save(sub).catch(() => {});
     } catch (e) {}
-    if (me() && me().super && Notification.permission !== "denied") this.loadKey();
+    if (me() && Notification.permission !== "denied") this.loadKey();
     this.badge();
     if (canRender()) render();
   },
@@ -978,7 +980,7 @@ const notif = {
   kick() { if (IS_LIVE) fetch(LIVE.url + PUSH_FN, { method: "POST", headers: { apikey: LIVE.key }, keepalive: true }).catch(() => {}); },
   later() { ls.set(NOTIF_LATER, String(Date.now())); },
   showCard() {
-    const u = me(); if (!u || !u.super) return false;
+    const u = me(); if (!u) return false;
     const st = this.state(); if (st !== "off" && st !== "demo") return false;
     const t = Number(ls.get(NOTIF_LATER) || 0);
     return !t || Date.now() - t > 14 * DAY;
@@ -986,8 +988,10 @@ const notif = {
 };
 function notifCard() {
   if (!notif.showCard()) return "";
+  const sup = me().super;
   return `<div class="panel notif-card" id="notif-card"><span class="ni" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><i>1</i></span>
-    <b>Neue Anfragen sofort sehen</b><p>Mitteilung aufs iPhone und roter Zähler am App-Symbol, sobald jemand auf deine Freigabe wartet.</p>
+    ${sup ? `<b>Neue Anfragen sofort sehen</b><p>Mitteilung aufs iPhone und roter Zähler am App-Symbol, sobald jemand auf deine Freigabe wartet.</p>`
+      : `<b>Bescheid bekommen</b><p>Mitteilung aufs iPhone, sobald deine Anfrage freigegeben oder abgelehnt ist.</p>`}
     <div class="row"><button class="btn btn-ink" data-act="notif-on">Einschalten</button><button class="btn btn-soft" data-act="notif-later">Später</button></div></div>`;
 }
 function turnOnNotif(btn) {
@@ -1473,7 +1477,7 @@ function renderReq() {
       <div class="section"><div class="section-head"><h2>Wartet auf dich</h2></div>${forMe.length ? `<div class="panel req-list">${forMe.map(reqRow).join("")}</div>` : `<div class="panel none-yet">Nichts offen. Neue Anfragen aus den anderen Familien erscheinen hier.</div>`}</div>`;
     if (others.length) html += `<div class="section"><div class="section-head"><h2>Wartet auf andere</h2></div><div class="panel req-list">${others.map(reqRow).join("")}</div></div>`;
   } else {
-    html += `<p class="lead">Deine Anfragen reservieren die Tage sofort. Freigeben kann ${otherSupers(u.stamm).join(" oder ")}. In der Hochsaison müssen ${andList(superPeople().map(p => p.name))} alle zustimmen.</p>
+    html += `<p class="lead">Deine Anfragen reservieren die Tage sofort. Freigeben kann ${otherSupers(u.stamm).join(" oder ")}. In der Hochsaison müssen ${andList(superPeople().map(p => p.name))} alle zustimmen.</p>${notifCard()}
       <div class="section"><div class="section-head"><h2>Deine Anfragen</h2></div>${mine.length ? `<div class="panel req-list">${mine.map(reqRow).join("")}</div>` : `<div class="panel empty"><p>Du hast noch nichts angefragt.</p><button class="btn btn-ink" data-act="plan">Aufenthalt planen</button></div>`}</div>`;
     if (others.length) html += `<div class="section"><div class="section-head"><h2>Offen bei anderen</h2></div><div class="panel req-list">${others.map(reqRow).join("")}</div></div>`;
   }
@@ -1703,7 +1707,7 @@ function openAccount() {
       <div class="kv"><span>Stand</span><span>${lastSync ? fmtSync(lastSync) : "offline"}</span></div>
       <div class="kv"><span>Version</span><span class="num">${APP_VERSION}</span></div>
     </div>
-    ${u.super ? `<div id="acct-notif">${acctNotifHTML()}</div>` : ""}
+    <div id="acct-notif">${acctNotifHTML()}</div>
     <div class="actions"><button class="btn btn-soft btn-wide" data-act="logout">Abmelden</button></div></div>`,
     { label: "Konto", onMount: (body, layer) => {
       body.addEventListener("click", e => {
@@ -1720,13 +1724,15 @@ function openAccount() {
       });
     } });
 }
-/* Konto: Zeile „Mitteilungen“ (nur Super-User – nur sie bekommen welche). */
+/* Konto: Zeile „Mitteilungen“. Super-User: neue Anfragen. Alle: Entscheidung über die eigene Anfrage. */
 function acctNotifHTML() {
-  const st = notif.state(), n = openForMe();
+  const st = notif.state(), n = openForMe(), sup = me().super;
   const label = { on: "An", off: "Aus", denied: "Am iPhone aus", browser: "Nur in der App", unsupported: "iOS zu alt", demo: "Vorschau" }[st];
   const hint = {
-    on: `Du bekommst eine Mitteilung, sobald eine Anfrage auf deine Freigabe wartet. Der rote Zähler am App-Symbol zeigt, wie viele${n ? ` (gerade ${n})` : ""}.`,
-    off: "Mitteilung aufs iPhone und roter Zähler am App-Symbol, sobald jemand auf deine Freigabe wartet.",
+    on: sup ? `Du bekommst eine Mitteilung, sobald eine Anfrage auf deine Freigabe wartet. Der rote Zähler am App-Symbol zeigt, wie viele${n ? ` (gerade ${n})` : ""}.`
+      : "Du bekommst eine Mitteilung, sobald deine Anfrage freigegeben ist (mit allen, die freigegeben haben) oder abgelehnt wurde.",
+    off: sup ? "Mitteilung aufs iPhone und roter Zähler am App-Symbol, sobald jemand auf deine Freigabe wartet."
+      : "Mitteilung aufs iPhone, sobald deine Anfrage freigegeben oder abgelehnt ist.",
     denied: "Einschalten unter Einstellungen › Mitteilungen › Casa la Paz › Mitteilungen erlauben, Kennzeichen an.",
     browser: "Mitteilungen gibt es nur, wenn du Casa la Paz über das Symbol auf dem Home-Bildschirm öffnest.",
     unsupported: "Mitteilungen brauchen iOS 16.4 oder neuer.",

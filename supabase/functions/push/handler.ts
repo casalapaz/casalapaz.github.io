@@ -1,11 +1,15 @@
 // Server-Funktion "push" (Supabase Edge Function).
 //   GET  → { publicKey }          öffentlicher VAPID-Schlüssel für die App
-//   POST → verschickt alle fälligen Mitteilungen (idempotent: jede Anfrage
-//          höchstens einmal pro Person). Die App ruft das nach jeder neuen
-//          Anfrage auf. Wer was bekommt, entscheidet die Datenbank (push_due).
+//   POST → verschickt alle fälligen Mitteilungen (idempotent, jede höchstens einmal):
+//          neue Anfrage → Super-User, deren Freigabe fehlt;
+//          fertig entschieden → die Person, die angefragt hat.
+//          Die App ruft das nach jeder neuen Anfrage und jeder finalen Entscheidung auf.
+//          Wer was bekommt, entscheidet die Datenbank (push_due).
 import { send, type SendResult, type Vapid } from "./webpush.ts";
 
 export type Row = {
+  kind?: "request" | "confirmed" | "rejected";
+  approvers?: string[]; decided_by?: string | null; reason?: string;
   booking_id: string; person_id: string; endpoint: string; p256dh: string; auth: string;
   booked_by: string; arrive: string; depart: string; high_season: boolean; open_count: number;
 };
@@ -36,8 +40,28 @@ export function fmtRange(a: string, b: string): string {
 }
 const nightsOf = (a: string, b: string) => Math.round((Date.UTC(...(parts(b) as [number, number, number])) - Date.UTC(...(parts(a) as [number, number, number]))) / 864e5);
 
+const andList = (a: string[]) => a.length > 1 ? `${a.slice(0, -1).join(", ")} und ${a[a.length - 1]}` : (a[0] ?? "");
+const clip = (t: string, n: number) => t.length > n ? t.slice(0, n - 1).trimEnd() + "…" : t;
+
 export function message(r: Row) {
   const n = nightsOf(r.arrive, r.depart);
+  const range = fmtRange(r.arrive, r.depart);
+  if (r.kind === "confirmed") {
+    const who = r.approvers?.length ? r.approvers : r.decided_by ? [r.decided_by] : [];
+    return {
+      title: `Freigegeben: ${range}`,
+      body: `${who.length ? `${andList(who)} ${who.length > 1 ? "haben" : "hat"} freigegeben. ` : ""}Dein Aufenthalt (${n === 1 ? "1 Nacht" : `${n} Nächte`}) ist bestätigt.`,
+      badge: r.open_count, tag: `${r.booking_id}-d`, url: "./#anfragen",
+    };
+  }
+  if (r.kind === "rejected") {
+    const reason = (r.reason ?? "").trim();
+    return {
+      title: `Abgelehnt: ${range}`,
+      body: `${r.decided_by ?? "Jemand"} hat abgelehnt${reason ? `: „${clip(reason, 140)}“` : "."}`,
+      badge: r.open_count, tag: `${r.booking_id}-d`, url: "./#anfragen",
+    };
+  }
   return {
     title: `Neue Anfrage von ${r.booked_by}`,
     body: `${fmtRange(r.arrive, r.depart)} · ${n === 1 ? "1 Nacht" : `${n} Nächte`}${r.high_season ? " · Hochsaison" : ""}. Wartet auf deine Freigabe.`,
@@ -54,8 +78,11 @@ export async function sweep(d: Deps) {
   const results: (SendResult & { row: Row })[] = await Promise.all(
     rows.map(async (row) => ({ ...(await send(row, message(row), d.vapid!, d.fetcher)), row })),
   );
-  const sent = new Map<string, { booking_id: string; person_id: string }>();
-  for (const r of results) if (r.ok) sent.set(`${r.row.booking_id}|${r.row.person_id}`, { booking_id: r.row.booking_id, person_id: r.row.person_id });
+  const sent = new Map<string, { kind: string; booking_id: string; person_id: string }>();
+  for (const r of results) {
+    const kind = r.row.kind ?? "request";
+    if (r.ok) sent.set(`${kind}|${r.row.booking_id}|${r.row.person_id}`, { kind, booking_id: r.row.booking_id, person_id: r.row.person_id });
+  }
   const gone = results.filter((r) => r.gone).map((r) => r.endpoint);
   const ok = results.filter((r) => r.ok).map((r) => r.endpoint);
   for (const r of results) if (!r.ok) log(`push an ${r.row.person_id} (${new URL(r.endpoint).host}) fehlgeschlagen: ${r.status} ${r.detail ?? ""}`);

@@ -236,8 +236,8 @@ EP = "https://web.push.apple.com/QF"
 KEYS = ("B" + "x" * 86, "a" * 22)
 def sub(who, ep):
     return as_user(f"{who}@x.de", "select save_push_subscription(%s, %s, %s)", (ep, *KEYS))
-def due():
-    r, e = as_role("service_role", "select person_id, endpoint, booked_by, high_season, open_count, booking_id::text from push_due()")
+def due(kind="request"):
+    r, e = as_role("service_role", f"select person_id, endpoint, booked_by, high_season, open_count, booking_id::text, approvers, decided_by, reason from push_due() where kind = '{kind}'")
     assert e is None, e
     return r
 r, e = as_role("anon", "select save_push_subscription('https://x', 'y', 'z')")
@@ -292,9 +292,44 @@ as_user("micha@x.de", "select delete_push_subscription(%s)", (EP + "m1",))
 check("Eigenes Gerät abmelden", admin("select count(*) from push_subscriptions where endpoint = %s", (EP + "m1",))[0][0] == 0)
 for i in range(7): sub("leon", EP + f"l{i+2}")
 check("Höchstens 5 Geräte pro Person", admin("select count(*) from push_subscriptions where person_id = 'leon'")[0][0] == 5)
-src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "migrate-4.4.0-mitteilungen.sql"), encoding="utf-8").read().strip()
+src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "migrate-4.5.0-mitteilungen.sql"), encoding="utf-8").read().strip()
 setup_src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "setup.sql"), encoding="utf-8").read()
-check("Migration 4.4.0 steht wortgleich in setup.sql", src in setup_src)
+check("Migration 4.5.0 steht wortgleich in setup.sql", src in setup_src)
+
+print("Mitteilungen über Entscheidungen (an die anfragende Person)")
+admin("delete from bookings"); admin("delete from push_subscriptions"); admin("delete from push_decided")
+for w in ("leon", "karlina", "micha", "uli", "fanny"): sub(w, EP + "d-" + w)
+r, e = create("leon", "2027-07-05", "2027-07-09"); hs = r[0][0]
+decide("micha", hs, "approve")
+check("Hochsaison, 1 von 3: keine Mitteilung an Leon", due("confirmed") == [], due("confirmed"))
+decide("fanny", hs, "approve")
+check("Hochsaison, 2 von 3: weiterhin keine", due("confirmed") == [], due("confirmed"))
+decide("uli", hs, "approve")
+d = due("confirmed")
+check("3 von 3: Leon bekommt 'freigegeben'", [(x[0], x[5]) for x in d] == [("leon", str(hs))], d)
+check("…mit allen Freigebenden in Reihenfolge", d and d[0][6] == ["Micha", "Fanny", "Uli"], d)
+check("Super-User bekommen keine Entscheidungs-Mitteilung", not [x for x in due("confirmed") + due("rejected") if x[0] != "leon"])
+r, e = create("karlina", "2027-10-11", "2027-10-14"); n1 = r[0][0]
+decide("micha", n1, "approve")
+d = [x for x in due("confirmed") if x[5] == str(n1)]
+check("Außerhalb der Hochsaison: eine Freigabe reicht, Karlina erfährt 'Micha'", [(x[0], x[6]) for x in d] == [("karlina", ["Micha"])], d)
+r, e = create("leon", "2027-11-11", "2027-11-14"); rj = r[0][0]
+decide("fanny", rj, "reject", "Da wird das Dach gemacht")
+d = due("rejected")
+check("Abgelehnt: Leon bekommt Name und Begründung", [(x[0], x[7], x[8]) for x in d] == [("leon", "Fanny", "Da wird das Dach gemacht")], d)
+r, e = create("fanny", "2027-12-01", "2027-12-05")
+check("Super-User-Buchung (sofort bestätigt): keine Mitteilung", not [x for x in due("confirmed") if x[0] == "fanny"])
+r, e = create("marilen", "2027-12-10", "2027-12-12"); cn = r[0][0]
+as_user("marilen@x.de", "select cancel_booking(%s)", (cn,))
+check("Storno: keine Entscheidungs-Mitteilung", not [x for x in due("confirmed") + due("rejected") if x[5] == str(cn)])
+as_role("service_role", "select push_report('[{\"kind\": \"confirmed\", \"booking_id\": \"%s\", \"person_id\": \"leon\"}]', '{}', '{}')" % hs)
+check("Nach Versand nicht doppelt", not [x for x in due("confirmed") if x[5] == str(hs)])
+check("…und die Anfrage-Mitteilungen bleiben unberührt", admin("select count(*) from push_sent where booking_id = %s", (hs,)) == [(0,)])
+admin("update bookings set decided_at = now() - interval '4 days' where id = %s", (n1,))
+check("Älter als 3 Tage: wird nicht mehr nachgeliefert", not [x for x in due("confirmed") if x[5] == str(n1)])
+admin("update bookings set decided_at = now() where id = %s", (n1,))
+admin("delete from push_subscriptions where person_id = 'karlina'"); sub("karlina", EP + "d-karlina2")
+check("Neues Gerät: schon entschiedene eigene Anfragen gelten als gemeldet", not [x for x in due("confirmed") if x[5] == str(n1)])
 admin("delete from bookings"); admin("delete from push_subscriptions")
 
 print(f"\n{ok} ok, {fail} fehlgeschlagen")
