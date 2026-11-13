@@ -449,6 +449,20 @@ grant execute on function public.save_push_subscription(text, text, text), publi
 grant execute on function public.push_due(), public.push_report(jsonb, text[], text[]) to service_role;
 
 -- ---------------------------------------------------------------------
+-- Echtzeit (seit 4.6.0): Änderungen an Buchungen meldet Supabase Realtime
+-- sofort an geöffnete Apps. Wer was sehen darf, prüft Realtime mit denselben
+-- Leserechten (RLS) wie das normale Laden. Ohne diesen Schritt fragt die App
+-- alle 15 Sekunden selbst nach. Beliebig oft ausführbar.
+-- ---------------------------------------------------------------------
+do $$ begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (select 1 from pg_publication_tables
+                      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'bookings') then
+    alter publication supabase_realtime add table public.bookings;
+  end if;
+end $$;
+
+-- ---------------------------------------------------------------------
 -- Anmelden dürfen nur E-Mail-Adressen aus "people"
 -- ---------------------------------------------------------------------
 create or replace function public.guard_signup() returns trigger

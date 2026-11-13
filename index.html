@@ -701,7 +701,7 @@ if (typeof window === "undefined") return;
    Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
    Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
    Die Datei ist in beiden Umgebungen identisch. */
-const APP_VERSION = "4.5.1";
+const APP_VERSION = "4.6.0";
 const LIVE = {
   hosts: ["casalapaz.github.io"],
   url: "https://nwrkrotxhgtxtshprfur.supabase.co",
@@ -833,7 +833,7 @@ const fromRow = r => ({
   decidedBy: r.decided_by || null, decidedAt: r.decided_at ? Date.parse(r.decided_at) : null, reason: r.reason || "",
   hs: !!r.high_season, approvals: (r.approvals || []).map(a => ({ by: a.by, at: Date.parse(a.at) }))
 });
-let lastSync = 0;
+let lastSync = 0, lastSig = "";
 function applyData(d) {
   PEOPLE = d.people;
   db = { me: d.me, bookings: d.bookings.map(b => ({ ...b, with: [...b.with] })) };
@@ -847,14 +847,101 @@ async function sync() {
   ]);
   if (!meId) throw fail("Diese E-Mail-Adresse ist für Casa la Paz nicht freigeschaltet. Melde dich bei Leon.", { member: false });
   const data = { me: meId, people: people.map(p => ({ id: p.id, name: p.name, stamm: p.stamm, super: p.is_super })), bookings: rows.map(fromRow) };
-  applyData(data); lastSync = Date.now();
+  const sig = JSON.stringify([meId, people, rows]), changed = sig !== lastSig;
+  lastSig = sig; lastSync = Date.now();
+  if (changed) applyData(data);
   ls.set(CACHE_KEY, JSON.stringify({ ...data, email: sb.session && sb.session.email, at: lastSync }));
+  return changed;
 }
 function readCache() {
   try { const c = JSON.parse(ls.get(CACHE_KEY) || "null"); return c && c.email === (sb.session && sb.session.email) ? c : null; } catch (e) { return null; }
 }
 const canRender = () => !stack.length && !state.sel && !state.planning;
-function syncQuiet() { if (!IS_LIVE || !sb.session) return; sync().then(() => { if (canRender()) render(); }).catch(e => { if (e.auth || e.member === false) signedOut(e.message); }); }
+/* Im Hintergrund nachladen. Neu gezeichnet wird nur, wenn sich etwas geändert hat – und nicht,
+   während ein Sheet offen ist, gerade ein Zeitraum gewählt wird oder der Finger auf dem Bildschirm ist.
+   Dann wird nachgeholt (Sheet zu, Auswahl weg, kurz nach dem Wischen). */
+let syncing = null, syncAgain = false, pendingRender = false, lastTouch = 0, touchT;
+["touchstart", "pointerdown", "wheel"].forEach(t => addEventListener(t, () => { lastTouch = Date.now(); }, { passive: true, capture: true }));
+function syncQuiet() {
+  if (!IS_LIVE || !sb.session) return Promise.resolve();
+  if (syncing) { syncAgain = true; return syncing; }
+  syncing = sync().then(changed => { if (changed) showFresh(); })
+    .catch(e => { if (e.auth || e.member === false) signedOut(e.message); })
+    .finally(() => { syncing = null; if (syncAgain) { syncAgain = false; syncQuiet(); } });
+  return syncing;
+}
+function showFresh() {
+  if (!canRender()) { pendingRender = true; return; }
+  const wait = 1200 - (Date.now() - lastTouch);
+  if (wait > 0) { pendingRender = true; clearTimeout(touchT); touchT = setTimeout(showFresh, wait + 50); return; }
+  pendingRender = false; render();
+}
+function flushFresh() { if (pendingRender) setTimeout(showFresh, 380); }
+
+/* ---------- Echtzeit: Änderungen anderer erscheinen ohne Neustart ----------
+   1. Live-Verbindung zu Supabase Realtime (WebSocket, Phoenix-Protokoll, ohne Bibliothek):
+      jede Änderung an „bookings“ löst ein Nachladen aus (≈ 1 s). Was in der Tabelle steht,
+      prüft der Server über dieselben Leserechte wie beim normalen Laden.
+   2. Rückfall: Abfrage alle 15 s, solange die Live-Verbindung nicht steht (sonst alle 60 s).
+   3. Beim Zurückkehren in die App und bei eingehender Mitteilung: sofort nachladen. */
+const POLL_MS = () => (window.CASA_POLL_MS || 15e3), POLL_LIVE_MS = () => (window.CASA_POLL_LIVE_MS || 60e3);
+const rt = {
+  ws: null, joined: false, live: false, ref: 0, hb: null, retry: 0, again: null, soonT: null, token: null,
+  topic: "realtime:casa-bookings",
+  url: () => LIVE.url.replace(/^http/, "ws") + "/realtime/v1/websocket?apikey=" + encodeURIComponent(LIVE.key) + "&vsn=1.0.0",
+  start() {
+    if (!IS_LIVE || !sb.session || this.ws || !("WebSocket" in window) || document.visibilityState === "hidden") return;
+    clearTimeout(this.again);
+    let ws;
+    try { ws = new WebSocket(this.url()); } catch (e) { return this.later(); }
+    this.ws = ws;
+    ws.onopen = () => {
+      this.token = sb.session && sb.session.access_token;
+      this.send(this.topic, "phx_join", {
+        config: { broadcast: { ack: false, self: false }, presence: { key: "" }, private: false,
+                  postgres_changes: [{ event: "*", schema: "public", table: "bookings" }] },
+        access_token: this.token
+      });
+      clearInterval(this.hb);
+      this.hb = setInterval(() => this.beat(), window.CASA_HB_MS || 25e3);
+    };
+    ws.onmessage = ev => { let m; try { m = JSON.parse(ev.data); } catch (e) { return; } this.on(m); };
+    ws.onclose = () => { if (this.ws !== ws) return; this.reset(); this.later(); };
+    ws.onerror = () => { try { ws.close(); } catch (e) {} };
+  },
+  on(m) {
+    if (m.topic !== this.topic) return;
+    if (m.event === "phx_reply" && m.payload) {
+      if (m.payload.status === "ok") { if (!this.joined) { this.joined = true; this.retry = 0; this.soon(); } }   // beim (Wieder-)Verbinden einmal abgleichen
+      else if (m.payload.status === "error") this.ws && this.ws.close();
+    } else if (m.event === "system" && m.payload) {
+      if (m.payload.extension === "postgres_changes") this.live = m.payload.status === "ok";
+    } else if (m.event === "postgres_changes") this.soon();
+    else if (m.event === "phx_error" || m.event === "phx_close") this.ws && this.ws.close();
+  },
+  send(topic, event, payload) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify({ topic, event, payload, ref: String(++this.ref) })); },
+  async beat() {
+    this.send("phoenix", "heartbeat", {});
+    await sb.refresh();   // Anmeldung läuft nach 1 h ab: rechtzeitig erneuern und dem Server mitteilen
+    const t = sb.session && sb.session.access_token;
+    if (t && t !== this.token && this.joined) { this.token = t; this.send(this.topic, "access_token", { access_token: t }); }
+  },
+  soon() { clearTimeout(this.soonT); this.soonT = setTimeout(() => syncQuiet(), 250); },
+  reset() { clearInterval(this.hb); this.ws = null; this.joined = false; this.live = false; },
+  later() {
+    if (!sb.session || document.visibilityState === "hidden") return;
+    const d = [1, 2, 5, 10, 30][Math.min(this.retry++, 4)] * 1e3;
+    clearTimeout(this.again); this.again = setTimeout(() => this.start(), d);
+  },
+  stop() {
+    clearTimeout(this.again); const ws = this.ws; this.reset();
+    if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
+  }
+};
+setInterval(() => {
+  if (!IS_LIVE || !sb.session || document.visibilityState === "hidden" || !db) return;
+  if (Date.now() - lastSync > (rt.live ? POLL_LIVE_MS() : POLL_MS())) syncQuiet();
+}, 1000);
 
 /* Gleiche Aktionen für Werkbank und Live. Live: die Datenbank prüft alle Regeln noch einmal. */
 const api = {
@@ -915,7 +1002,11 @@ const notif = {
   async init() {
     if (this.started || !IS_LIVE || !this.supported()) return;
     this.started = true;
-    navigator.serviceWorker.addEventListener("message", ev => { if (ev.data && ev.data.type === "open") { closeAll(); setTab("req"); syncQuiet(); } });
+    navigator.serviceWorker.addEventListener("message", ev => {
+      if (!ev.data) return;
+      if (ev.data.type === "open") { closeAll(); setTab("req"); syncQuiet(); }
+      if (ev.data.type === "changed") syncQuiet();   // Mitteilung kam, während die App offen ist
+    });
     try { await navigator.serviceWorker.register("sw.js"); this.reg = await navigator.serviceWorker.ready; } catch (e) { return; }
     try {
       const sub = await this.reg.pushManager.getSubscription();
@@ -1399,7 +1490,7 @@ function bar(main, sub, btn) {
   selbar.querySelector("button").textContent = btn || "Abbrechen";
   selbar.classList.add("on");
 }
-function clearSel() { state.sel = null; state.planning = false; bar(null); paintSel(); }
+function clearSel() { state.sel = null; state.planning = false; bar(null); paintSel(); flushFresh(); }
 /* Latest possible departure for an arrival: the next arrival of another Stamm (turnover day allowed). */
 function maxDeparture(from) {
   const u = me(), cap = addDays(from, MAX_NIGHTS);
@@ -1512,6 +1603,7 @@ function closeSheet(layer = stack[stack.length - 1], vel = 0) {
   sh.style.transform = "translateY(105%)";
   if (!stack.length) { document.body.classList.remove("sheet-up", "sheet-drag"); document.getElementById("app").style.transform = ""; }
   if (layer._onClose) layer._onClose();
+  if (!stack.length) flushFresh();
   setTimeout(() => layer.remove(), 520);
 }
 function closeAll() { while (stack.length) closeSheet(stack[stack.length - 1]); }
@@ -1887,13 +1979,14 @@ loginEl.addEventListener("click", e => {
 function enterApp() {
   setTab(({ "#kalender": "cal", "#anfragen": "req", "#uebersicht": "home" })[location.hash] || "home");
   notif.init();
+  rt.start();
   if (!loginEl.hidden) {
     document.activeElement && document.activeElement.blur && document.activeElement.blur();
     loginEl.classList.add("leave"); setTimeout(() => { loginEl.hidden = true; loginEl.innerHTML = ""; }, 500);
     haptic();
   }
 }
-function signedOut(msg) { sb.store(null); ls.set(CACHE_KEY, ""); closeAll(); showLogin("email", msg || ""); }
+function signedOut(msg) { rt.stop(); lastSig = ""; sb.store(null); ls.set(CACHE_KEY, ""); closeAll(); showLogin("email", msg || ""); }
 async function signOut() {
   if (notif.subscribed) await Promise.race([notif.disable(), new Promise(r => setTimeout(r, 2500))]);
   else if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
@@ -1916,11 +2009,12 @@ async function checkVersion() {
   } catch (e) {}
 }
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState !== "visible") return;
+  if (document.visibilityState !== "visible") { rt.stop(); return; }   // iOS trennt im Hintergrund ohnehin
   if (todayISO() !== TODAY) { location.reload(); return; }   // über Nacht offen gelassen
   checkVersion();
-  if (IS_LIVE && Date.now() - lastSync > 20e3) syncQuiet();
+  if (IS_LIVE && sb.session) { syncQuiet(); rt.start(); }
 });
+addEventListener("online", () => { if (IS_LIVE && sb.session) { syncQuiet(); rt.retry = 0; rt.stop(); rt.start(); } });
 
 /* ---------- Boot ---------- */
 function route(res) {

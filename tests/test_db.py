@@ -295,6 +295,9 @@ check("Höchstens 5 Geräte pro Person", admin("select count(*) from push_subscr
 src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "migrate-4.5.0-mitteilungen.sql"), encoding="utf-8").read().strip()
 setup_src = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "setup.sql"), encoding="utf-8").read()
 check("Migration 4.5.0 steht wortgleich in setup.sql", src in setup_src)
+src46 = open(__import__("os").path.join(__import__("os").path.dirname(__file__), "..", "supabase", "migrate-4.6.0-echtzeit.sql"), encoding="utf-8").read().strip()
+check("Migration 4.6.0 steht wortgleich in setup.sql", src46 in setup_src)
+check("Buchungen sind für Realtime freigegeben", admin("select count(*) from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'bookings'") == [(1,)])
 
 print("Mitteilungen über Entscheidungen (an die anfragende Person)")
 admin("delete from bookings"); admin("delete from push_subscriptions"); admin("delete from push_decided")

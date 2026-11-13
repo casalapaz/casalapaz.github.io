@@ -1,6 +1,6 @@
 # Casa la Paz – Einrichtung der Live-App
 
-**Stand:** 12.11.2026 · App-Version 4.5.0 (live)
+**Stand:** 13.11.2026 · App-Version 4.6.0 (live)
 **Für:** Leon (einmalig)
 **Dauer:** ca. 60–75 Minuten am Laptop, danach 10 Minuten pro Familienmitglied am iPhone
 **Kosten:** 0 € (GitHub Free, Supabase Free, Gmail)
@@ -21,6 +21,7 @@
 | **E** | Claude schaltet die App scharf | **Claude** | 10 Min. |
 | **F** | GitHub Pages und Wartungs-Jobs aktivieren | Leon | 10 Min. |
 | **I** | Mitteilungen einrichten (neu in 4.4/4.5) – **vor G** | Leon | 10 Min. |
+| **J** | Echtzeit einschalten (neu in 4.6) | Leon | 1 Min. |
 | **G** | Testlauf mit zwei Personen (inkl. Mitteilung) | Leon + Micha | 15 Min. |
 | **H** | Familie aufs iPhone bringen | Leon | 10 Min. pro Person |
 
@@ -329,6 +330,18 @@ Ein langes neues Passwort (z. B. vom Passwortmanager generiert) → #8. **Ohne d
 
 ---
 
+## Teil J – Echtzeit einschalten (1 Min., neu in 4.6.0)
+
+**Was es bringt:** Eine Änderung auf einem Handy (Anfrage, Freigabe, Storno) erscheint auf allen anderen geöffneten Apps nach **etwa einer Sekunde** – ohne Schließen und Neuöffnen. Ohne diesen Schritt fragt die App alle 15 Sekunden selbst nach; das funktioniert auch, ist aber langsamer.
+
+**J1.** Im Repo **`supabase/migrate-4.6.0-echtzeit.sql`** öffnen → *Copy raw file* → Supabase → *SQL Editor* → *New query* → einfügen → *Run*.
+
+✅ **Fertig, wenn** „Success. No rows returned“ erscheint. Prüfen (optional): Supabase → *Database* → *Publications* → `supabase_realtime` → dort steht `bookings`.
+
+ℹ️ Ist eine App im Hintergrund, schläft ihre Verbindung (macht iOS so). Beim Zurückholen lädt sie sofort nach – auch ohne Schließen.
+
+---
+
 ## Teil G – Testlauf mit zwei Personen (15 Min.)
 
 Bevor die Familie loslegt, einmal den ganzen Ablauf prüfen – du als Sub-User, Micha als Super-User.
@@ -397,6 +410,7 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 | Wach-halten-Aufruf | täglich, 07:17 Uhr (Sommerzeit 08:17) | Kostenlose Supabase-Projekte schlafen sonst nach 7 Tagen ohne Nutzung ein. |
 | Verschlüsselte Sicherung | sonntags, 04:41 Uhr (Sommerzeit 05:41) | Alle Personen und Buchungen in `backups/`, die letzten 12 Wochen. |
 | App-Updates | beim Öffnen | Die App prüft `version.json` und lädt neue Versionen selbst. Niemand muss etwas tun. |
+| Echtzeit | solange die App offen ist | Änderungen anderer erscheinen nach ≈ 1 s (Live-Verbindung), sonst nach höchstens 15 s; beim Zurückholen der App sofort. |
 | Mitteilungen | bei jeder neuen Anfrage und jeder finalen Entscheidung | Die App stößt die Server-Funktion `push` an; die Datenbank bestimmt, wer benachrichtigt wird (jede Mitteilung höchstens einmal). |
 | Server-Funktion neu ausspielen | wenn sich `supabase/functions/` ändert | Workflow „Mitteilungen ausspielen“ läuft dann von selbst. |
 
@@ -421,6 +435,7 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 | P10 | „Supabase wach halten“ läuft nicht mehr (Reiter *Actions*: Workflow grau/„disabled“) | GitHub schaltet geplante Jobs in öffentlichen Repos nach **60 Tagen ohne Änderung am Repo** ab. Die sonntägliche Sicherung legt jede Woche eine neue Datei ab und hält das Repo damit aktiv – solange sie grün läuft. Wenn doch: Workflow anklicken → *Enable workflow*, dann prüfen, warum die Sicherung rot ist. |
 | P11 | Mitteilung kommt nicht an | 1. iPhone: *Einstellungen* → *Mitteilungen* → *Casa la Paz* → Mitteilungen erlauben und **Kennzeichen** an; Fokus/„Nicht stören“ prüfen. 2. In der App *Konto* → Mitteilungen: steht dort „An“? 3. Supabase → *Edge Functions* → `push` → *Logs*: Zeilen „push an … fehlgeschlagen“ an Claude schicken. Eine Mitteilung kommt pro Anfrage nur einmal; alte Anfragen von vor dem Einschalten zählt nur der rote Zähler. |
 | P12 | Workflow „Mitteilungen ausspielen“ gelb/„übersprungen“ | Secret `SUPABASE_ACCESS_TOKEN` fehlt oder ist falsch benannt (I3). Danach *Run workflow*. |
+| P13 | Änderungen erscheinen erst nach ~15 s statt sofort | Teil J fehlt (Publication) oder Realtime ist im Supabase-Projekt aus (*Project Settings* → *Realtime*). Die App funktioniert trotzdem. |
 | P9 | Person hinzufügen | *Table Editor* → `people` → *Insert row*: `id` (kurz, klein, z. B. `lena`), `name`, `stamm` (`micha`/`uli`/`fanny`), `is_super` = false, `email`, `sort`. |
 
 ---
@@ -434,5 +449,6 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 - [ ] E: drei Werte an Claude, Code liegt im Repo
 - [ ] F: Pages live, 4 Secrets, beide Jobs grün
 - [ ] I: Mitteilungen – SQL, Token, Workflow grün, bei Micha/Uli/Fanny eingeschaltet
+- [ ] J: Echtzeit – SQL ausgeführt
 - [ ] G: Testlauf Leon + Micha ok (inkl. Mitteilung), Testbuchungen storniert
 - [ ] H: Bestandsbuchungen importiert, Familie eingeladen, Eltern eingerichtet, kalender.digital stillgelegt

@@ -129,7 +129,32 @@ srv = http.server.ThreadingHTTPServer(("127.0.0.1", 8123), functools.partial(Qui
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 APP = "http://127.0.0.1:8123/index.html"
 
-async def new_ctx(browser, live=True, w=390, h=844, storage=None, dark=False, ios=None, ua=None):
+class FakeRealtime:
+    """Nachgestellter Supabase-Realtime-Server (Phoenix-Protokoll). mode: ok | silent | refuse"""
+    def __init__(self, mode="ok"):
+        self.mode, self.sockets, self.msgs, self.attempts = mode, [], [], 0
+    async def __call__(self, ws):
+        self.attempts += 1
+        if self.mode == "refuse":
+            await ws.close(code=1011); return
+        self.sockets.append(ws)
+        def on_msg(m):
+            d = json.loads(m); self.msgs.append(d)
+            if d["event"] == "phx_join" and self.mode == "ok":
+                ws.send(json.dumps({"topic": d["topic"], "event": "phx_reply", "ref": d["ref"],
+                    "payload": {"status": "ok", "response": {"postgres_changes": [{"id": 1, "event": "*", "schema": "public", "table": "bookings"}]}}}))
+                ws.send(json.dumps({"topic": d["topic"], "event": "system", "ref": None,
+                    "payload": {"channel": "casa-bookings", "extension": "postgres_changes", "message": "Subscribed to PostgreSQL", "status": "ok"}}))
+            elif d["event"] == "heartbeat":
+                ws.send(json.dumps({"topic": "phoenix", "event": "phx_reply", "ref": d["ref"], "payload": {"status": "ok", "response": {}}}))
+        ws.on_message(on_msg)
+    def change(self):
+        for ws in self.sockets:
+            ws.send(json.dumps({"topic": "realtime:casa-bookings", "event": "postgres_changes", "ref": None,
+                                "payload": {"data": {"type": "INSERT", "table": "bookings"}, "ids": [1]}}))
+    def joins(self): return [m for m in self.msgs if m["event"] == "phx_join"]
+
+async def new_ctx(browser, live=True, w=390, h=844, storage=None, dark=False, ios=None, ua=None, rt=None):
     ctx = await browser.new_context(viewport={"width": w, "height": h}, device_scale_factor=2, is_mobile=True, has_touch=True,
                                     reduced_motion="reduce", color_scheme="dark" if dark else "light", storage_state=storage, locale="de-DE",
                                     **({"user_agent": ua} if ua else {}))
@@ -138,6 +163,7 @@ async def new_ctx(browser, live=True, w=390, h=844, storage=None, dark=False, io
     await ctx.route("https://fonts.googleapis.com/**", lambda r: r.fulfill(status=200, content_type="text/css", body=""))
     await ctx.route("https://fonts.gstatic.com/**", lambda r: r.abort())
     await ctx.route(SB + "/**", handle)
+    await ctx.route_web_socket(re.compile(r".*/realtime/v1/websocket.*"), rt or FakeRealtime())
     page = await ctx.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -449,6 +475,68 @@ async def main():
             await page.click('.tab[data-tab="req"]'); await page.wait_for_timeout(500)
             await page.screenshot(path=f"{SHOTS}/notif-card-{name}.png")
             await ctx.close()
+
+        print("Echtzeit: Änderung auf einem Handy erscheint auf dem anderen")
+        admin("delete from bookings where status = 'pending'")
+        fr = FakeRealtime()
+        ctx, page, errs = await new_ctx(browser, rt=fr)
+        await login(page, "micha@x.de"); await page.wait_for_selector("#v-home .hello h1", timeout=5000)
+        await page.wait_for_timeout(600)
+        j = fr.joins()
+        check("Live-Verbindung: Anmeldung mit Nutzer-Token und Tabelle bookings", len(j) == 1 and j[0]["payload"]["access_token"] == "tok:micha@x.de"
+              and j[0]["payload"]["config"]["postgres_changes"] == [{"event": "*", "schema": "public", "table": "bookings"}], j)
+        check("Verbindungs-URL mit Publishable Key und Protokollversion", "apikey=" in fr.sockets[0].url and "vsn=1.0.0" in fr.sockets[0].url, fr.sockets[0].url)
+        await page.click('.tab[data-tab="req"]'); await page.wait_for_timeout(300)
+        marker = await page.evaluate("(() => { const el = document.querySelector('#v-req'); el.dataset.probe = '1'; return document.querySelectorAll('#v-req [data-approve]').length; })()")
+        r, e = as_user("kaspar@x.de", "select (create_booking('2028-03-06', '2028-03-09')).id::text")
+        check("Kaspar fragt an (anderes Handy)", e is None, e)
+        t0 = time.time(); fr.change()
+        await page.wait_for_function("document.querySelectorAll('#v-req [data-approve]').length > %d" % marker, timeout=3000)
+        dt = time.time() - t0
+        check(f"Erscheint bei Micha ohne Neustart ({dt:.1f} s)", dt < 2.0, dt)
+        check("Reiter-Zähler aktualisiert", (await page.inner_text("#badge")).strip() == str(marker + 1))
+        # Sheet offen: nicht dazwischenfunken, nach dem Schließen nachholen
+        await page.click('#v-req [data-act="who"]'); await page.wait_for_selector("#acct-notif")
+        r, e = as_user("karlina@x.de", "select (create_booking('2028-03-13', '2028-03-15')).id::text")
+        fr.change(); await page.wait_for_timeout(900)
+        n_open = await page.evaluate("document.querySelectorAll('#v-req [data-approve]').length")
+        check("Bei offenem Sheet wird nicht neu gezeichnet", n_open == marker + 1, n_open)
+        await page.click(".layer .x-btn")
+        await page.wait_for_function("document.querySelectorAll('#v-req [data-approve]').length > %d" % (marker + 1), timeout=3000)
+        check("Nach dem Schließen nachgeholt", await page.evaluate("document.querySelectorAll('#v-req [data-approve]').length") == marker + 2)
+        # Abfrage ohne Änderung zeichnet nicht neu (kein Flackern)
+        await page.evaluate("document.querySelector('#v-req .section').dataset.keep = '1'")
+        n0 = len(calls); fr.change(); await page.wait_for_timeout(800)
+        check("Echtzeit-Signal ohne Datenänderung: lädt nach …", any(c[1] == "/rest/v1/bookings" for c in calls[n0:]))
+        check("… zeichnet aber nicht neu", await page.evaluate("!!document.querySelector('#v-req .section[data-keep]')"))
+        check("Keine Fehler in der Konsole (Echtzeit)", not errs, errs[:3])
+        await ctx.close()
+
+        print("Echtzeit: Rückfall, wenn die Live-Verbindung nicht steht")
+        fr2 = FakeRealtime("refuse")
+        ctx, page, errs = await new_ctx(browser, rt=fr2, ios="window.CASA_POLL_MS = 1500;")
+        await login(page, "fanny@x.de"); await page.wait_for_selector("#v-home .hello h1", timeout=5000)
+        await page.click('.tab[data-tab="req"]'); await page.wait_for_timeout(500)
+        n = await page.evaluate("document.querySelectorAll('#v-req [data-approve]').length")
+        r, e = as_user("marilen@x.de", "select (create_booking('2028-03-20', '2028-03-23')).id::text")
+        t0 = time.time()
+        await page.wait_for_function("document.querySelectorAll('#v-req [data-approve]').length > %d" % n, timeout=6000)
+        dt = time.time() - t0
+        check(f"Ohne Live-Verbindung per Abfrage nachgeladen ({dt:.1f} s)", dt < 4, dt)
+        check("Live-Verbindung wird erneut versucht", fr2.attempts >= 2, fr2.attempts)
+        await ctx.close()
+
+        print("Echtzeit: Herzschlag, Werkbank")
+        fr3 = FakeRealtime()
+        ctx, page, errs = await new_ctx(browser, rt=fr3, ios="window.CASA_HB_MS = 400;")
+        await login(page, "uli@x.de"); await page.wait_for_selector("#v-home .hello h1", timeout=5000)
+        await page.wait_for_timeout(1000)
+        check("Herzschlag an den Server", any(m["event"] == "heartbeat" and m["topic"] == "phoenix" for m in fr3.msgs))
+        await ctx.close()
+        ctx, page, errs = await new_ctx(browser, live=False, rt=(fr4 := FakeRealtime()))
+        await page.goto(APP); await page.wait_for_selector("#v-home .hello h1", timeout=3000); await page.wait_for_timeout(500)
+        check("Werkbank öffnet keine Live-Verbindung", fr4.sockets == [])
+        await ctx.close()
 
         print("Kleine Bildschirme + Dunkelmodus")
         for (w, h, dark, name) in [(390, 640, False, "640"), (375, 560, False, "560"), (390, 844, True, "dark")]:

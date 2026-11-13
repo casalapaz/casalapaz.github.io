@@ -17,6 +17,9 @@ self.addEventListener("push", e => {
   if (typeof d.badge === "number" && self.navigator.setAppBadge) {
     jobs.push((d.badge > 0 ? self.navigator.setAppBadge(d.badge) : self.navigator.clearAppBadge()).catch(() => {}));
   }
+  // Ist die App gerade offen: sofort nachladen lassen
+  jobs.push(self.clients.matchAll({ type: "window", includeUncontrolled: true })
+    .then(list => list.forEach(c => c.postMessage({ type: "changed" }))).catch(() => {}));
   e.waitUntil(Promise.all(jobs));
 });
 
