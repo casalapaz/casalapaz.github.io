@@ -701,7 +701,7 @@ if (typeof window === "undefined") return;
    Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
    Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
    Die Datei ist in beiden Umgebungen identisch. */
-const APP_VERSION = "4.6.0";
+const APP_VERSION = "4.6.1";
 const LIVE = {
   hosts: ["casalapaz.github.io"],
   url: "https://nwrkrotxhgtxtshprfur.supabase.co",
@@ -1212,12 +1212,16 @@ function nextStayFor(u) {
 function heroChip(b) {
   return b.status === "pending" ? '<span class="chip chip-wait"><span class="dot"></span>Freigabe offen</span>' : '<span class="chip chip-ok"><span class="dot"></span>Bestätigt</span>';
 }
+/* Statuszeile unter „Hola“ – eine Zeile (iPhone ≈ 38 Zeichen): kurze Monate, Jahr nur, wenn nicht dieses Jahr. */
+const dayShort = s => { const [y, m, d] = parts(s); return `${d}. ${MON_S[m - 1]}${y !== thisYear ? " " + y : ""}`; };
 function houseLine() {
-  const now = db.bookings.find(b => isActive(b) && b.from <= TODAY && TODAY < b.to);
-  if (now) return `Gerade im Haus: ${esc(person(now.by).name)}, bis ${fmtDay(now.to, false, false)}`;
-  const nxt = db.bookings.filter(b => isActive(b) && b.from > TODAY).sort((a, b) => a.from < b.from ? -1 : 1)[0];
-  if (nxt) return `Haus frei bis ${fmtDay(nxt.from, false, false)}, dann ${esc(person(nxt.by).name)}`;
-  return "Das Haus ist frei";
+  const act = db.bookings.filter(b => isActive(b) && b.to > TODAY).sort((a, b) => a.from < b.from ? -1 : 1);
+  const now = act.find(b => b.from <= TODAY);
+  if (now) return `Jetzt im Haus: ${esc(person(now.by).name)}, bis ${dayShort(now.to)}`;
+  const nxt = act[0];
+  if (!nxt) return "Das Haus ist frei, nichts geplant";
+  const who = esc(person(nxt.by).name);
+  return nxt.status === "pending" ? `Frei bis ${dayShort(nxt.from)}, ${who} fragt an` : `Frei bis ${dayShort(nxt.from)}, dann ${who}`;
 }
 function renderHome() {
   const u = me(), v = document.getElementById("v-home");
