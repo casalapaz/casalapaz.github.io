@@ -701,7 +701,7 @@ if (typeof window === "undefined") return;
    Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
    Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
    Die Datei ist in beiden Umgebungen identisch. */
-const APP_VERSION = "4.5.0";
+const APP_VERSION = "4.5.1";
 const LIVE = {
   hosts: ["casalapaz.github.io"],
   url: "https://nwrkrotxhgtxtshprfur.supabase.co",
@@ -1180,7 +1180,7 @@ function renderHome() {
       <button class="panel tile" data-tab-go="cal"><div><div class="tile-t">Kalender ${arrowIcon}</div><div class="tile-s sub">${MONTHS[cm - 1]} ${cy}</div></div><div class="mini-month" style="--r:${Math.ceil((weekday(first) + dim) / 7)}" aria-hidden="true">${mm}</div></button>
       <button class="panel tile" data-tab-go="req"><div><div class="tile-t">Anfragen ${arrowIcon}</div></div>
         <div><div class="tile-big num" style="${reqNum ? "" : "color:var(--ink-3)"}">${reqNum}</div><div class="tile-s">${reqText}</div></div>${u.super && reqNum ? `<span class="tile-badge">${reqNum}</span>` : ""}</button>
-      <button class="panel tile s-${u.stamm}" data-act="quota"><div><div class="tile-t">Freinächte ${arrowIcon}</div><div class="tile-s sub">${STAMM_NAME[u.stamm]}s Familie, ${state.year}</div></div>
+      <button class="panel tile s-${u.stamm}" data-act="quota"><div><div class="tile-t">Kontingente ${arrowIcon}</div><div class="tile-s sub">${STAMM_NAME[u.stamm]}s Familie, ${state.year}</div></div>
         <div class="ring-wrap">${ring}<div class="tile-s" style="margin:0">${quotaSub}</div></div></button>
       <button class="panel tile" data-act="year"><div><div class="tile-t">Das Jahr ${arrowIcon}</div><div class="tile-s sub">Belegung ${state.year}</div></div><div class="mini-year" aria-hidden="true">${my}</div></button>
     </div>
@@ -1238,11 +1238,11 @@ function quotaRow(s, y) {
 }
 function openQuota() {
   let y = state.year;
-  openSheet(`<div class="sheet-title"><h2>Freinächte</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+  openSheet(`<div class="sheet-title"><h2>Kontingente</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
     <div class="year-switch" style="margin-top:10px"><button class="icon-btn" data-ys="-1" aria-label="Vorjahr">${chev(-1)}</button><span class="y num"></span><button class="icon-btn" data-ys="1" aria-label="Folgejahr">${chev(1)}</button></div>
     <div data-rows></div>
     <p class="faint" style="font-size:14px;margin:6px 0 0;line-height:1.4">21 Freinächte pro Familie und Kalenderjahr. Gezählt werden Nächte, in denen die Familie im Haus ist, auch wenn mehrere aus der Familie gleichzeitig da sind. Jede weitere Nacht kostet ${eur(RATE)} (200 € pro Woche). Die Freinächte verbraucht, wer zuerst im Jahr da ist.</p>`,
-  { label: "Freinächte", onMount: (body) => {
+  { label: "Kontingente", onMount: (body) => {
     const paint = () => {
       body.querySelector(".y").textContent = y;
       body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2028;
