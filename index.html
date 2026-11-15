@@ -384,6 +384,23 @@ textarea.note::placeholder { color: var(--ink-3); }
 .q-foot { grid-column: 1 / -1; font-size: 14px; color: var(--ink-2); display: flex; justify-content: space-between; gap: 10px; }
 .q-foot b { color: var(--ink); font-weight: 650; }
 .q-over b { color: var(--c); }
+.q-open { font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; }
+.q-done { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: var(--ok); font-variant-numeric: tabular-nums; }
+.amount { display: flex; align-items: baseline; gap: 6px; font-family: var(--display); font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
+.amount input { width: 140px; border: 0; background: transparent; outline: none; text-align: right; font: inherit; color: var(--ink); font-variant-numeric: tabular-nums; padding: 8px 0; }
+.pay-head { font-size: 13px; color: var(--ink-3); margin: 22px 0 4px; }
+.pays { list-style: none; margin: 0; padding: 0; }
+.pays li { padding: 12px 0 12px 18px; border-top: 1px solid var(--line); position: relative; }
+.pays li::before { content: ""; position: absolute; left: 0; top: 19px; width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.pay-line { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; }
+.pays small { display: block; font-size: 13px; color: var(--ink-3); margin-top: 2px; line-height: 1.35; }
+.pays li.void .pay-amt, .pays li.void .pay-line > span { text-decoration: line-through; color: var(--ink-3); }
+.pays li.void::before { background: var(--line-2); }
+.pay-void { color: var(--ink-2) !important; }
+.pay-other { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 48px; margin: 0 0 14px; padding: 0 12px 0 16px; border-radius: 15px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-size: 15px; color: var(--ink-2); }
+.pay-other b { color: var(--ink); margin-left: auto; }
+.pay-other svg { width: 16px; height: 16px; flex: none; }
+.pay-undo { margin-top: 2px; font-size: 14px; font-weight: 600; color: var(--uli); min-height: 32px; padding: 0; }
 /* who */
 .who-stamm { font-size: 13px; color: var(--ink-3); margin: 18px 0 6px; }
 .who { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 6px 4px; border-radius: 14px; }
@@ -554,6 +571,45 @@ function quota(bookings, stamm, year) {
   return { nights: conf, free: Math.min(conf, FREE_NIGHTS), paid, cost: paid * RATE, pending: all - conf, projected: all, projectedPaid: Math.max(0, all - FREE_NIGHTS) };
 }
 
+/* Ausgleich (wie Splitwise, auf Vertrauen): Kosten in Cent minus nicht zurückgenommene Ausgleiche.
+   Gleiche Rechnung wie in der Datenbank (family_cost_cents). Negativ offen = Guthaben (z. B. nach Storno). */
+const costCents = (bookings, stamm, year) => Math.round(quota(bookings, stamm, year).paid * 20000 / 7);
+function balance(bookings, payments, stamm, year) {
+  const costC = costCents(bookings, stamm, year);
+  const list = (payments || []).filter(p => p.stamm === stamm && p.year === year);
+  const paidC = list.filter(p => !p.voidAt).reduce((s, p) => s + p.cents, 0);
+  return { costC, paidC, openC: costC - paidC, list };
+}
+const canSettle = (u, bal) => !!u && u.super && bal.openC > 0;
+const canVoid = (u, p) => !!u && u.super && u.stamm === p.stamm && !p.voidAt;
+/* "50", "50,5", "1.234,56", "50.00" -> Cent; sonst null */
+function parseCents(s) {
+  let t = String(s || "").replace(/[\s€]/g, "");
+  if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+  if (!/^\d{1,6}(\.\d{1,2})?$/.test(t)) return null;
+  return Math.round(parseFloat(t) * 100);
+}
+function recordPayment(bookings, payments, u, year, cents, note, now, thisYear) {
+  if (!u || !u.super) throw new Error("Ausgleichen können nur Super-User.");
+  if (year < 2026 || year > thisYear + 2) throw new Error("Für dieses Jahr ist kein Ausgleich möglich.");
+  if (!(cents >= 1)) throw new Error("Gib einen Betrag über 0 € ein.");
+  const { openC } = balance(bookings, payments, u.stamm, year);
+  if (openC <= 0) throw new Error(`Für ${year} ist nichts offen.`);
+  if (cents > openC) throw new Error(`Offen sind nur noch ${(openC / 100).toFixed(2).replace(".", ",")} €.`);
+  const p = { id: "p" + now.toString(36) + Math.random().toString(36).slice(2, 6), stamm: u.stamm, year, cents,
+    note: String(note || "").trim().slice(0, 140), by: u.id, at: now, voidBy: null, voidAt: null };
+  payments.push(p);
+  return p;
+}
+function voidPayment(payments, u, id, now) {
+  const p = payments.find(x => x.id === id);
+  if (!p) throw new Error("Eintrag nicht gefunden.");
+  if (!u || !u.super || u.stamm !== p.stamm) throw new Error("Zurücknehmen kann nur der Super-User der Familie.");
+  if (p.voidAt) throw new Error("Dieser Ausgleich ist schon zurückgenommen.");
+  p.voidBy = u.id; p.voidAt = now;
+  return p;
+}
+
 /* What a planned stay adds for its Stamm: new nights (union), extra paid nights, cost, free nights left. */
 function impact(bookings, draft) {
   const years = new Set(nightsOf(draft).map(n => n.slice(0, 4)));
@@ -701,7 +757,7 @@ if (typeof window === "undefined") return;
    Werkbank: Claude-Artifact, Testdaten im Browser, Rollenwechsel.
    Live: eigene Adresse (LIVE.hosts), Anmeldung per Code, Daten in Supabase.
    Die Datei ist in beiden Umgebungen identisch. */
-const APP_VERSION = "4.6.1";
+const APP_VERSION = "4.7.0";
 const LIVE = {
   hosts: ["casalapaz.github.io"],
   url: "https://nwrkrotxhgtxtshprfur.supabase.co",
@@ -746,6 +802,15 @@ function seed(now) {
   ];
 }
 
+function seedPayments(now) {
+  const t = iso => D(iso) + 18 * 3600e3;
+  return [
+    { id: "p1", stamm: "micha", year: 2026, cents: 15000, note: "per PayPal an Uli", by: "micha", at: t("2026-08-20"), voidBy: null, voidAt: null },
+    { id: "p2", stamm: "uli", year: 2026, cents: 82857, note: "", by: "uli", at: t("2026-09-28"), voidBy: "uli", voidAt: t("2026-09-28") + 600e3 },
+    { id: "p3", stamm: "uli", year: 2026, cents: 50000, note: "Überweisung, Rest im Dezember", by: "uli", at: t("2026-10-05"), voidBy: null, voidAt: null }
+  ];
+}
+
 /* ---------- Store (Testdaten im Browser; später Supabase) ---------- */
 const KEY = "casa-la-paz.proto.v1";
 const mem = {};
@@ -759,6 +824,7 @@ let db;
 function load() {
   try { db = JSON.parse(ls.get(KEY)); } catch (e) { db = null; }
   if (!db || !Array.isArray(db.bookings)) db = { me: "leon", bookings: seed(nowMs()) };
+  if (!Array.isArray(db.payments)) db.payments = seedPayments(nowMs());
   for (const b of db.bookings) {   // ältere Testdaten ergänzen
     if (!Array.isArray(b.approvals)) b.approvals = b.status === "confirmed" && b.decidedBy ? [{ by: b.decidedBy, at: b.decidedAt }] : [];
     if (typeof b.hs !== "boolean") b.hs = touchesHighSeason(b.from, b.to);
@@ -833,23 +899,32 @@ const fromRow = r => ({
   decidedBy: r.decided_by || null, decidedAt: r.decided_at ? Date.parse(r.decided_at) : null, reason: r.reason || "",
   hs: !!r.high_season, approvals: (r.approvals || []).map(a => ({ by: a.by, at: Date.parse(a.at) }))
 });
+const fromPayRow = r => ({
+  id: r.id, stamm: r.stamm, year: r.year, cents: r.amount_cents, note: r.note || "", by: r.created_by, at: Date.parse(r.created_at),
+  voidBy: r.voided_by || null, voidAt: r.voided_at ? Date.parse(r.voided_at) : null
+});
+/* Ausgleich braucht migrate-4.7.0-ausgleich.sql. Ohne die Tabelle läuft die App wie vorher (Kosten ohne Ausgleich). */
+const payOn = () => !IS_LIVE || !!(db && db.payOk);
 let lastSync = 0, lastSig = "";
 function applyData(d) {
   PEOPLE = d.people;
-  db = { me: d.me, bookings: d.bookings.map(b => ({ ...b, with: [...b.with] })) };
+  db = { me: d.me, bookings: d.bookings.map(b => ({ ...b, with: [...b.with] })), payments: (d.payments || []).map(p => ({ ...p })), payOk: !!d.payOk };
   expire(db.bookings, nowMs(), TODAY);   // nur Anzeige; die Datenbank setzt den Verfall selbst
 }
 async function sync() {
-  const [meId, people, rows] = await Promise.all([
+  const [meId, people, rows, pays] = await Promise.all([
     sb.call("/rest/v1/rpc/whoami", "POST", {}),
     sb.call("/rest/v1/people?select=id,name,stamm,is_super,sort&order=sort.asc"),
-    sb.call("/rest/v1/bookings?select=*&order=arrive.asc")
+    sb.call("/rest/v1/bookings?select=*&order=arrive.asc"),
+    sb.call("/rest/v1/payments?select=*&order=created_at.asc").catch(e => e.status === 404 || e.status === 403 ? null : Promise.reject(e))
   ]);
   if (!meId) throw fail("Diese E-Mail-Adresse ist für Casa la Paz nicht freigeschaltet. Melde dich bei Leon.", { member: false });
-  const data = { me: meId, people: people.map(p => ({ id: p.id, name: p.name, stamm: p.stamm, super: p.is_super })), bookings: rows.map(fromRow) };
-  const sig = JSON.stringify([meId, people, rows]), changed = sig !== lastSig;
+  const data = { me: meId, people: people.map(p => ({ id: p.id, name: p.name, stamm: p.stamm, super: p.is_super })), bookings: rows.map(fromRow),
+    payments: (pays || []).map(fromPayRow), payOk: Array.isArray(pays) };
+  const sig = JSON.stringify([meId, people, rows, pays]), changed = sig !== lastSig;
   lastSig = sig; lastSync = Date.now();
   if (changed) applyData(data);
+  if (rt.ws && rt.withPay !== data.payOk) { rt.stop(); rt.start(); }   // Ausgleich gerade eingerichtet: auch diese Tabelle live verfolgen
   ls.set(CACHE_KEY, JSON.stringify({ ...data, email: sb.session && sb.session.email, at: lastSync }));
   return changed;
 }
@@ -865,7 +940,7 @@ let syncing = null, syncAgain = false, pendingRender = false, lastTouch = 0, tou
 function syncQuiet() {
   if (!IS_LIVE || !sb.session) return Promise.resolve();
   if (syncing) { syncAgain = true; return syncing; }
-  syncing = sync().then(changed => { if (changed) showFresh(); })
+  syncing = sync().then(changed => { if (changed) { showFresh(); if (quotaPaint) quotaPaint(); } })
     .catch(e => { if (e.auth || e.member === false) signedOut(e.message); })
     .finally(() => { syncing = null; if (syncAgain) { syncAgain = false; syncQuiet(); } });
   return syncing;
@@ -886,7 +961,7 @@ function flushFresh() { if (pendingRender) setTimeout(showFresh, 380); }
    3. Beim Zurückkehren in die App und bei eingehender Mitteilung: sofort nachladen. */
 const POLL_MS = () => (window.CASA_POLL_MS || 15e3), POLL_LIVE_MS = () => (window.CASA_POLL_LIVE_MS || 60e3);
 const rt = {
-  ws: null, joined: false, live: false, ref: 0, hb: null, retry: 0, again: null, soonT: null, token: null,
+  ws: null, joined: false, live: false, ref: 0, hb: null, retry: 0, again: null, soonT: null, token: null, withPay: false,
   topic: "realtime:casa-bookings",
   url: () => LIVE.url.replace(/^http/, "ws") + "/realtime/v1/websocket?apikey=" + encodeURIComponent(LIVE.key) + "&vsn=1.0.0",
   start() {
@@ -897,9 +972,12 @@ const rt = {
     this.ws = ws;
     ws.onopen = () => {
       this.token = sb.session && sb.session.access_token;
+      // "payments" nur, wenn die Tabelle existiert – eine nicht freigegebene Tabelle würde die ganze Verbindung scheitern lassen
+      this.withPay = !!(db && db.payOk);
+      const tables = this.withPay ? ["bookings", "payments"] : ["bookings"];
       this.send(this.topic, "phx_join", {
         config: { broadcast: { ack: false, self: false }, presence: { key: "" }, private: false,
-                  postgres_changes: [{ event: "*", schema: "public", table: "bookings" }] },
+                  postgres_changes: tables.map(table => ({ event: "*", schema: "public", table })) },
         access_token: this.token
       });
       clearInterval(this.hb);
@@ -966,6 +1044,18 @@ const api = {
     const row = await sb.call("/rest/v1/rpc/cancel_booking", "POST", { p_id: id });
     await sync().catch(() => {});
     return fromRow(row);
+  },
+  async pay(year, cents, note) {
+    if (!IS_LIVE) { const p = recordPayment(db.bookings, db.payments, me(), year, cents, note, nowMs(), Number(TODAY.slice(0, 4))); save(); return p; }
+    const row = await sb.call("/rest/v1/rpc/record_payment", "POST", { p_year: year, p_amount_cents: cents, p_note: note || "" });
+    await sync().catch(() => {});
+    return fromPayRow(row);
+  },
+  async voidPay(id) {
+    if (!IS_LIVE) { const p = voidPayment(db.payments, me(), id, nowMs()); save(); return p; }
+    const row = await sb.call("/rest/v1/rpc/void_payment", "POST", { p_id: id });
+    await sync().catch(() => {});
+    return fromPayRow(row);
   }
 };
 /* Nach einem Fehler im Live-Betrieb den Stand neu holen (z. B. hat jemand anderes schon entschieden). */
@@ -1254,7 +1344,9 @@ function renderHome() {
       ${proj > used ? `<circle class="pd" cx="33" cy="33" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - proj)}"/>` : ""}
       <circle class="fg" cx="33" cy="33" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - used)}"/></g>
       <text x="33" y="36" text-anchor="middle">${Math.max(0, FREE_NIGHTS - q.nights)}</text><text class="rl" x="33" y="48" text-anchor="middle">frei</text></svg>`;
-  const quotaSub = q.paid ? `<b>${nights(q.paid)}</b> darüber<br>${eur(q.cost)}` : q.pending ? `+${q.pending} angefragt` : `von ${FREE_NIGHTS}`;
+  const bal = payOn() ? balance(db.bookings, db.payments, u.stamm, state.year) : null;
+  const balTxt = !bal ? eur(q.cost) : bal.openC > 0 ? `${eur(bal.openC / 100)} offen` : bal.openC < 0 ? `${eur(-bal.openC / 100)} Guthaben` : "ausgeglichen";
+  const quotaSub = q.paid || (bal && bal.openC < 0) ? `<b>${nights(q.paid)}</b> darüber<br>${balTxt}` : q.pending ? `+${q.pending} angefragt` : `von ${FREE_NIGHTS}`;
   // Calendar tile: this month
   const [cy, cm] = parts(TODAY);
   const first = `${cy}-${p2(cm)}-01`, dim = new Date(Date.UTC(cy, cm, 0)).getUTCDate();
@@ -1323,29 +1415,99 @@ function openYear() {
   } });
 }
 function quotaRow(s, y) {
-  const q = quota(db.bookings, s, y);
+  const q = quota(db.bookings, s, y), bal = payOn() ? balance(db.bookings, db.payments, s, y) : null;
   let ticks = ""; for (let i = 0; i < FREE_NIGHTS; i++) ticks += `<i class="tick ${i < q.free ? "on" : i < q.projected ? "pend" : ""}"></i>`;
   const left = FREE_NIGHTS - q.free;
-  const foot = q.paid ? `<span class="q-over"><b>${nights(q.paid)}</b> darüber</span><span><b class="num">${eur(q.cost)}</b></span>`
-    : `<span>${left ? `noch <b>${nights(left)}</b> frei` : "Freinächte aufgebraucht"}</span><span class="num">${eur(0)}</span>`;
+  const st = !bal || (!bal.costC && !bal.paidC) ? "" : bal.openC > 0 ? `<span class="q-open">${eur(bal.openC / 100)} offen</span>`
+    : bal.openC < 0 ? `<span class="q-done">${eur(-bal.openC / 100)} Guthaben</span>` : `<span class="q-done">${checkIcon}ausgeglichen</span>`;
+  const foot = q.paid ? (st ? `<span class="q-over"><b>${nights(q.paid)}</b> darüber · <b class="num">${eur(q.cost)}</b></span>${st}`
+      : `<span class="q-over"><b>${nights(q.paid)}</b> darüber</span><span><b class="num">${eur(q.cost)}</b></span>`)
+    : `<span>${left ? `noch <b>${nights(left)}</b> frei` : "Freinächte aufgebraucht"}</span>${st || `<span class="num">${eur(0)}</span>`}`;
   const pend = q.pending ? `<span class="faint" style="font-size:13px;font-weight:500"> + ${q.pending} angefragt</span>` : "";
   return `<div class="q s-${s}"><span class="q-name">${STAMM_NAME[s]}${pend}</span><span class="q-num num">${q.nights}<small> Nächte</small></span><div class="ticks" aria-hidden="true">${ticks}</div><div class="q-foot">${foot}</div></div>`;
 }
+const checkIcon = `<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.5 10.5 3.5 3.5 7.5-8"/></svg>`;
+function fmtDate(ms) { const x = new Date(ms); return `${x.getDate()}. ${MON_S[x.getMonth()]} ${x.getFullYear()}`; }
+/* Verlauf eines Jahres: alle Familien, neueste zuerst. Zurückgenommene bleiben durchgestrichen stehen. */
+function payHistory(y) {
+  const u = me(), list = db.payments.filter(p => p.year === y).sort((a, b) => b.at - a.at);
+  if (!list.length) return "";
+  return `<div class="pay-head">Ausgeglichen ${y}</div><ul class="pays">${list.map(p => `<li class="s-${p.stamm} ${p.voidAt ? "void" : ""}">
+      <div class="pay-line"><span><b>${esc(person(p.by).name)}</b> für ${STAMM_NAME[p.stamm]}s Familie</span><b class="num pay-amt">${eur(p.cents / 100)}</b></div>
+      <small>${fmtDate(p.at)}${p.note ? ` · ${esc(p.note)}` : ""}</small>
+      ${p.voidAt ? `<small class="pay-void">Zurückgenommen von ${esc(person(p.voidBy).name)} am ${fmtDate(p.voidAt)}</small>`
+        : canVoid(u, p) ? `<button class="pay-undo" data-void="${p.id}">Zurücknehmen</button>` : ""}</li>`).join("")}</ul>`;
+}
+let quotaPaint = null;
 function openQuota() {
   let y = state.year;
   openSheet(`<div class="sheet-title"><h2>Kontingente</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
     <div class="year-switch" style="margin-top:10px"><button class="icon-btn" data-ys="-1" aria-label="Vorjahr">${chev(-1)}</button><span class="y num"></span><button class="icon-btn" data-ys="1" aria-label="Folgejahr">${chev(1)}</button></div>
     <div data-rows></div>
-    <p class="faint" style="font-size:14px;margin:6px 0 0;line-height:1.4">21 Freinächte pro Familie und Kalenderjahr. Gezählt werden Nächte, in denen die Familie im Haus ist, auch wenn mehrere aus der Familie gleichzeitig da sind. Jede weitere Nacht kostet ${eur(RATE)} (200 € pro Woche). Die Freinächte verbraucht, wer zuerst im Jahr da ist.</p>`,
-  { label: "Kontingente", onMount: (body) => {
+    <div data-settle></div>
+    <p class="faint" style="font-size:14px;margin:6px 0 0;line-height:1.4">21 Freinächte pro Familie und Kalenderjahr. Gezählt werden Nächte, in denen die Familie im Haus ist, auch wenn mehrere aus der Familie gleichzeitig da sind. Jede weitere Nacht kostet ${eur(RATE)} (200 € pro Woche). Die Freinächte verbraucht, wer zuerst im Jahr da ist.${payOn() ? " Kosten zählen ab der Bestätigung. Ausgleichen trägt der Super-User der Familie ein, ohne Nachweis; jeder Eintrag bleibt im Verlauf." : ""}</p>
+    <div data-hist></div>`,
+  { label: "Kontingente", onClose: () => { quotaPaint = null; }, onMount: (body) => {
     const paint = () => {
+      const u = me();
       body.querySelector(".y").textContent = y;
       body.querySelector('[data-ys="-1"]').disabled = y <= 2026; body.querySelector('[data-ys="1"]').disabled = y >= 2028;
       body.querySelector("[data-rows]").innerHTML = STAMME.map(s => quotaRow(s, y)).join("");
+      const bal = payOn() ? balance(db.bookings, db.payments, u.stamm, y) : null;
+      // Offenes aus anderen Jahren (z. B. im Herbst schon das Folgejahr gezeigt, Vorjahr noch offen)
+      const elsewhere = bal && u.super ? [2026, 2027, 2028].filter(x => x !== y).map(x => [x, balance(db.bookings, db.payments, u.stamm, x).openC]).filter(([, c]) => c > 0) : [];
+      body.querySelector("[data-settle]").innerHTML = (bal && canSettle(u, bal)
+        ? `<div class="actions s-${u.stamm}" style="margin:6px 0 16px"><button class="btn btn-c btn-wide" data-act="settle">Ausgleichen · ${eur(bal.openC / 100)}</button></div>` : "")
+        + elsewhere.map(([x, c]) => `<button class="pay-other" data-goyear="${x}">Offen aus ${x}: <b class="num">${eur(c / 100)}</b>${chev(1)}</button>`).join("");
+      body.querySelector("[data-hist]").innerHTML = payOn() ? payHistory(y) : "";
     };
-    body.addEventListener("click", e => { const ys = e.target.closest("[data-ys]"); if (ys) { y += Number(ys.dataset.ys); haptic(); paint(); } });
+    quotaPaint = paint;
+    body.addEventListener("click", e => {
+      const ys = e.target.closest("[data-ys]"); if (ys) { y += Number(ys.dataset.ys); haptic(); paint(); return; }
+      const gy = e.target.closest("[data-goyear]"); if (gy) { y = Number(gy.dataset.goyear); haptic(); paint(); return; }
+      if (e.target.closest('[data-act="settle"]')) { haptic(); openSettle(y); return; }
+      const v = e.target.closest("[data-void]"); if (v) doVoid(v);
+    });
     paint();
   } });
+}
+function openSettle(y) {
+  const u = me(), bal = balance(db.bookings, db.payments, u.stamm, y), full = (bal.openC / 100).toFixed(2).replace(".", ",");
+  openSheet(`<div class="s-${u.stamm}"><div class="sheet-title"><h2>Ausgleichen</h2><button class="x-btn" data-close aria-label="Schließen">${xIcon}</button></div>
+      <p class="muted" style="margin:8px 0 0">${STAMM_NAME[u.stamm]}s Familie, ${y}: offen sind <b class="num">${eur(bal.openC / 100)}</b>${bal.paidC ? ` (von ${eur(bal.costC / 100)})` : ""}.</p>
+      <div class="field-group"><label class="frow"><span class="frow-label">Betrag</span><span class="amount"><input id="pay-amt" inputmode="decimal" autocomplete="off" value="${full}" aria-label="Betrag in Euro"><span>€</span></span></label></div>
+      <div class="field-group"><textarea class="note" id="pay-note" rows="2" maxlength="140" placeholder="Notiz, zum Beispiel „per PayPal an Uli“" aria-label="Notiz"></textarea></div>
+      <div data-err></div>
+      <p class="impact-note">Ohne Nachweis, auf Vertrauensbasis. Alle sehen den Eintrag mit deinem Namen und Datum. Falls du dich vertippst: Zurücknehmen geht, der Eintrag bleibt dann durchgestrichen sichtbar.</p>
+      <div class="actions"><button class="btn btn-c btn-wide" data-act="do-pay"></button><button class="btn btn-soft btn-wide" data-close>Abbrechen</button></div></div>`,
+    { label: "Ausgleichen", onMount: (body) => {
+      const inp = body.querySelector("#pay-amt"), note = body.querySelector("#pay-note"), btn = body.querySelector('[data-act="do-pay"]'), err = body.querySelector("[data-err]");
+      const check = () => {
+        const c = parseCents(inp.value);
+        const msg = c == null || c < 1 ? (inp.value.trim() ? "Gib einen Betrag ein, zum Beispiel 50,00." : "")
+          : c > bal.openC ? `Offen sind nur ${eur(bal.openC / 100)}.` : "";
+        err.innerHTML = msg ? `<div class="err">${msg}</div>` : "";
+        const ok = c != null && c >= 1 && c <= bal.openC;
+        btn.disabled = !ok; btn.textContent = ok ? `${eur(c / 100)} ausgleichen` : "Ausgleichen";
+        return ok ? c : null;
+      };
+      inp.addEventListener("input", check);
+      inp.addEventListener("focus", () => inp.select());
+      check();
+      btn.addEventListener("click", () => {
+        const c = check(); if (c == null || btn.classList.contains("busy")) return;
+        busy(btn, true);
+        api.pay(y, c, note.value).then(p => { inp.blur(); note.blur(); haptic(); closeSheet(); toast(`Ausgeglichen: ${eur(p.cents / 100)}`); if (quotaPaint) quotaPaint(); })
+          .catch(e => { busy(btn, false); afterError(e); });
+      });
+    } });
+}
+function doVoid(btn) {
+  if (btn.dataset.armed !== "1") { btn.dataset.armed = "1"; btn.textContent = "Wirklich zurücknehmen?"; haptic(); setTimeout(() => { if (btn.isConnected) { btn.dataset.armed = ""; btn.textContent = "Zurücknehmen"; } }, 3500); return; }
+  if (btn.classList.contains("busy")) return;
+  busy(btn, true);
+  api.voidPay(btn.dataset.void).then(() => { haptic(); toast("Zurückgenommen, bleibt im Verlauf"); if (quotaPaint) quotaPaint(); })
+    .catch(e => { busy(btn, false); btn.dataset.armed = ""; afterError(e); });
 }
 
 /* ---------- Calendar ---------- */
@@ -1862,7 +2024,7 @@ function openWho() {
       body.addEventListener("click", e => {
         const w = e.target.closest("[data-me]");
         if (w) { db.me = w.dataset.me; save(); haptic(); closeSheet(layer); toast(`Ansicht: ${person(db.me).name}`); render(); }
-        if (e.target.closest('[data-act="reset"]')) { db = { me: db.me, bookings: seed(nowMs()) }; save(); haptic(); closeSheet(layer); toast("Testdaten zurückgesetzt"); render(); }
+        if (e.target.closest('[data-act="reset"]')) { db = { me: db.me, bookings: seed(nowMs()), payments: seedPayments(nowMs()) }; save(); haptic(); closeSheet(layer); toast("Testdaten zurückgesetzt"); render(); }
       });
     } });
 }

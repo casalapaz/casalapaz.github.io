@@ -24,9 +24,11 @@ jobs:
           case "$SUPABASE_SECRET" in eyJ*) hdr+=(-H "Authorization: Bearer $SUPABASE_SECRET");; esac
           curl -sS --fail-with-body "${hdr[@]}" "$SUPABASE_URL/rest/v1/bookings?select=*&order=arrive.asc" -o bookings.json || { echo "Fehler beim Lesen der Buchungen:"; cat bookings.json; exit 1; }
           curl -sS --fail-with-body "${hdr[@]}" "$SUPABASE_URL/rest/v1/people?select=*&order=sort.asc" -o people.json || { echo "Fehler beim Lesen der Personen:"; cat people.json; exit 1; }
-          jq -n --slurpfile b bookings.json --slurpfile p people.json \
-            '{exported_at: (now | todate), people: $p[0], bookings: $b[0]}' > backup.json
-          echo "Buchungen: $(jq length bookings.json), Personen: $(jq length people.json)"
+          # Ausgleiche (seit 4.7.0) – fehlt die Tabelle noch, wird eine leere Liste gesichert
+          curl -sS --fail "${hdr[@]}" "$SUPABASE_URL/rest/v1/payments?select=*&order=created_at.asc" -o payments.json 2>/dev/null || echo "[]" > payments.json
+          jq -n --slurpfile b bookings.json --slurpfile p people.json --slurpfile z payments.json \
+            '{exported_at: (now | todate), people: $p[0], bookings: $b[0], payments: $z[0]}' > backup.json
+          echo "Buchungen: $(jq length bookings.json), Personen: $(jq length people.json), Ausgleiche: $(jq length payments.json)"
           test "$(jq length people.json)" -gt 0
       - name: Verschlüsseln und ablegen
         env:
@@ -40,7 +42,7 @@ jobs:
           cp "backups/casa-la-paz-$(date -u +%Y-%m-%d).json.gpg" backups/casa-la-paz-latest.json.gpg
           # nur die letzten 12 Wochen behalten
           ls -1 backups/casa-la-paz-20*.json.gpg | sort | head -n -12 | xargs -r git rm -q --
-          rm -f backup.json bookings.json people.json
+          rm -f backup.json bookings.json people.json payments.json
           git config user.name "casa-backup"; git config user.email "actions@users.noreply.github.com"
           git add backups
           git diff --cached --quiet || git commit -m "Sicherung $(date -u +%Y-%m-%d)"

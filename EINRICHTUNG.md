@@ -22,6 +22,7 @@
 | **F** | GitHub Pages und Wartungs-Jobs aktivieren | Leon | 10 Min. |
 | **I** | Mitteilungen einrichten (neu in 4.4/4.5) – **vor G** | Leon | 10 Min. |
 | **J** | Echtzeit einschalten (neu in 4.6) | Leon | 1 Min. |
+| **K** | Ausgleich einschalten (neu in 4.7) | Leon | 1 Min. |
 | **G** | Testlauf mit zwei Personen (inkl. Mitteilung) | Leon + Micha | 15 Min. |
 | **H** | Familie aufs iPhone bringen | Leon | 10 Min. pro Person |
 
@@ -342,6 +343,16 @@ Ein langes neues Passwort (z. B. vom Passwortmanager generiert) → #8. **Ohne d
 
 ---
 
+## Teil K – Ausgleich einschalten (1 Min., neu in 4.7.0)
+
+**Was es bringt:** Im Sheet *Kontingente* können Micha, Uli und Fanny eintragen, dass ihre Familie Kosten eines Jahres beglichen hat (wie bei Splitwise, ohne Nachweis). Jeder Eintrag bleibt mit Name, Datum und Notiz im Verlauf, auch wenn er zurückgenommen wird. Ohne diesen Schritt zeigt die App die Kosten wie bisher, nur ohne Knopf und Verlauf.
+
+**K1.** Im Repo **`supabase/migrate-4.7.0-ausgleich.sql`** öffnen → *Copy raw file* → Supabase → *SQL Editor* → *New query* → einfügen → *Run*.
+
+✅ **Fertig, wenn** „Success. No rows returned“ erscheint. Danach die App einmal schließen und öffnen: im Sheet *Kontingente* steht bei Kosten „… offen“.
+
+---
+
 ## Teil G – Testlauf mit zwei Personen (15 Min.)
 
 Bevor die Familie loslegt, einmal den ganzen Ablauf prüfen – du als Sub-User, Micha als Super-User.
@@ -450,5 +461,6 @@ Erst wenn alle drei Familien in der App sind: in kalender.digital einen Hinweis 
 - [ ] F: Pages live, 4 Secrets, beide Jobs grün
 - [ ] I: Mitteilungen – SQL, Token, Workflow grün, bei Micha/Uli/Fanny eingeschaltet
 - [ ] J: Echtzeit – SQL ausgeführt
+- [ ] K: Ausgleich – SQL ausgeführt
 - [ ] G: Testlauf Leon + Micha ok (inkl. Mitteilung), Testbuchungen storniert
 - [ ] H: Bestandsbuchungen importiert, Familie eingeladen, Eltern eingerichtet, kalender.digital stillgelegt
